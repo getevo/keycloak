@@ -503,6 +503,7 @@ func (connection *Connection) VerifyOffline(accessToken string, claims interface
 
 	token, err := jwt.ParseSigned(accessToken, []jose.SignatureAlgorithm{jose.ES512, jose.HS384, jose.HS256, jose.RS256, jose.SignatureAlgorithm(jose.RSA_OAEP), jose.ES256})
 	if err != nil {
+		log.Error(err)
 		return spec, err
 	}
 	err = token.Claims(connection.Certificate.Keys[len(connection.Certificate.Keys)-1], &spec)
@@ -724,11 +725,13 @@ func Connect(s ...Settings) (*Connection, error) {
 	err = resp.ToJSON(&connection.Certificate)
 
 	if err != nil {
+		log.Error(err)
 		return &connection, err
 	}
 
 	j, err := connection.UpdateAdminToken(config.Realm)
 	if err != nil {
+		log.Error(err)
 		return &connection, err
 	}
 	var claims map[string]interface{}

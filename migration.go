@@ -63,7 +63,11 @@ func MigrateFields(model *schema.Model) {
 				}
 
 				if !found {
-					conn.Post("admin", "/clients/"+client.ID+"/protocol-mappers/models/", curl.Header{
+					var endpoint = "auth/admin"
+					if conn.Settings.Version >= 18 {
+						endpoint = "admin"
+					}
+					conn.Post(endpoint, "/clients/"+client.ID+"/protocol-mappers/models/", curl.Header{
 						"Authorization": "Bearer " + conn.Admin.AccessToken,
 					}, curl.BodyJSON(ProtocolMapper{
 						Protocol:       "openid-connect",

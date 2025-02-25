@@ -506,8 +506,6 @@ func (connection *Connection) VerifyOffline(accessToken string, claims interface
 		log.Error(err)
 		return spec, err
 	}
-	evo.Dump(token)
-	evo.Dump(connection)
 	err = token.Claims(connection.Certificate, &spec)
 	if spec.Iat != nil {
 		spec.AuthTime = int(time.Now().Unix()) - *spec.Iat

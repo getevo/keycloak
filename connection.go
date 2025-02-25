@@ -731,9 +731,10 @@ func Connect(s ...Settings) (*Connection, error) {
 		}*/
 	set, err := jwk.Parse(resp.Bytes())
 	if err != nil {
-		log.Error(err)
+		log.Fatalf(err)
 		return &connection, err
 	}
+	evo.Dump(set)
 	connection.Certificate = set
 	j, err := connection.UpdateAdminToken(config.Realm)
 	if err != nil {

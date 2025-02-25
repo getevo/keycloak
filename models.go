@@ -6,7 +6,7 @@ import (
 	"github.com/getevo/evo/v2"
 	"github.com/getevo/evo/v2/lib/date"
 	"github.com/getevo/evo/v2/lib/generic"
-	"github.com/go-jose/go-jose/v4"
+	"github.com/lestrrat-go/jwx/v3/jwk"
 	"strconv"
 	"time"
 )
@@ -29,9 +29,10 @@ type JWT struct {
 
 // Connection represents a connection to a server with authentication settings.
 type Connection struct {
-	Settings    *Settings
-	Admin       *JWT
-	Certificate jose.JSONWebKeySet
+	Settings *Settings
+	Admin    *JWT
+	//Certificate jose.JSONWebKeySet
+	Certificate jwk.Set
 }
 
 // Settings represents the configuration settings for connecting to a server in the application. It contains fields for the server URL, realm, client, client secret, autoconnect flag

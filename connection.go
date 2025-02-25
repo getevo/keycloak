@@ -9,6 +9,7 @@ import (
 	"github.com/getevo/evo/v2/lib/settings"
 	"github.com/getevo/evo/v2/lib/text"
 	"github.com/go-jose/go-jose/v4"
+	"github.com/lestrrat-go/jwx/v3/jwk"
 	"strings"
 	"time"
 
@@ -506,7 +507,7 @@ func (connection *Connection) VerifyOffline(accessToken string, claims interface
 		log.Error(err)
 		return spec, err
 	}
-	err = token.Claims(connection.Certificate.Keys[len(connection.Certificate.Keys)-1], &spec)
+	err = token.Claims(connection.Certificate.Keys()[0], &spec)
 	if spec.Iat != nil {
 		spec.AuthTime = int(time.Now().Unix()) - *spec.Iat
 	}
@@ -515,7 +516,7 @@ func (connection *Connection) VerifyOffline(accessToken string, claims interface
 		return spec, err
 	}
 	if claims != nil {
-		err := token.Claims(connection.Certificate.Keys[len(connection.Certificate.Keys)-1], claims)
+		err := token.Claims(connection.Certificate.Keys()[0], claims)
 		if err != nil {
 			return Spec{}, err
 		}
@@ -721,14 +722,15 @@ func Connect(s ...Settings) (*Connection, error) {
 	if config.Debug {
 		fmt.Println(resp.Dump())
 	}
-	connection.Certificate = jose.JSONWebKeySet{}
-	err = resp.ToJSON(&connection.Certificate)
+	/*	connection.Certificate = jose.JSONWebKeySet{}
+		err = resp.ToJSON(&connection.Certificate)
 
-	if err != nil {
-		log.Error(err)
-		return &connection, err
-	}
-
+		if err != nil {
+			log.Error(err)
+			return &connection, err
+		}*/
+	set, err := jwk.Parse(resp.Bytes())
+	connection.Certificate = set
 	j, err := connection.UpdateAdminToken(config.Realm)
 	if err != nil {
 		log.Error(err)

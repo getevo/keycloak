@@ -507,7 +507,7 @@ func (connection *Connection) VerifyOffline(accessToken string, claims interface
 		log.Error(err)
 		return spec, err
 	}
-	err = token.Claims(connection.Certificate.Keys()[0], &spec)
+	err = token.Claims(connection.Certificate, &spec)
 	if spec.Iat != nil {
 		spec.AuthTime = int(time.Now().Unix()) - *spec.Iat
 	}
@@ -516,7 +516,7 @@ func (connection *Connection) VerifyOffline(accessToken string, claims interface
 		return spec, err
 	}
 	if claims != nil {
-		err := token.Claims(connection.Certificate.Keys()[0], claims)
+		err := token.Claims(connection.Certificate, claims)
 		if err != nil {
 			return Spec{}, err
 		}
@@ -734,7 +734,6 @@ func Connect(s ...Settings) (*Connection, error) {
 		log.Fatalf(err)
 		return &connection, err
 	}
-	evo.Dump(set)
 	connection.Certificate = set
 	j, err := connection.UpdateAdminToken(config.Realm)
 	if err != nil {

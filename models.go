@@ -6,7 +6,7 @@ import (
 	"github.com/getevo/evo/v2"
 	"github.com/getevo/evo/v2/lib/date"
 	"github.com/getevo/evo/v2/lib/generic"
-	"github.com/lestrrat-go/jwx/v3/jwk"
+	"github.com/go-jose/go-jose/v4"
 	"strconv"
 	"time"
 )
@@ -32,7 +32,7 @@ type Connection struct {
 	Settings *Settings
 	Admin    *JWT
 	//Certificate jose.JSONWebKeySet
-	Certificate jwk.Set
+	Certificate jose.JSONWebKeySet
 }
 
 // Settings represents the configuration settings for connecting to a server in the application. It contains fields for the server URL, realm, client, client secret, autoconnect flag

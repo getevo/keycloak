@@ -9,7 +9,6 @@ import (
 	"github.com/getevo/evo/v2/lib/settings"
 	"github.com/getevo/evo/v2/lib/text"
 	"github.com/go-jose/go-jose/v4"
-	"github.com/lestrrat-go/jwx/v3/jwk"
 	"strings"
 	"time"
 
@@ -722,19 +721,14 @@ func Connect(s ...Settings) (*Connection, error) {
 	if config.Debug {
 		fmt.Println(resp.Dump())
 	}
-	/*	connection.Certificate = jose.JSONWebKeySet{}
-		err = resp.ToJSON(&connection.Certificate)
+	connection.Certificate = jose.JSONWebKeySet{}
+	err = resp.ToJSON(&connection.Certificate)
 
-		if err != nil {
-			log.Error(err)
-			return &connection, err
-		}*/
-	set, err := jwk.Parse(resp.Bytes())
 	if err != nil {
-		log.Fatalf(err)
+		log.Error(err)
 		return &connection, err
 	}
-	connection.Certificate = set
+	evo.Dump(connection.Certificate)
 	j, err := connection.UpdateAdminToken(config.Realm)
 	if err != nil {
 		log.Error(err)

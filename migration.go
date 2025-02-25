@@ -1,9 +1,9 @@
 package keycloak
 
 import (
-	"fmt"
 	"github.com/getevo/evo/v2/lib/curl"
 	"github.com/getevo/evo/v2/lib/db/schema"
+	"github.com/getevo/evo/v2/lib/log"
 	"reflect"
 	"strings"
 )
@@ -25,7 +25,7 @@ func migrate() {
 }
 
 func MigrateFields(model *schema.Model) {
-	fmt.Println("Migrating keycloak fields for model:", model.Name)
+	log.Info("Migrating keycloak fields for model:", model.Name)
 	for _, field := range model.Schema.Fields {
 		var tag = field.Tag.Get("keycloak")
 		var chunks = strings.Split(tag, ":")

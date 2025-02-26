@@ -728,7 +728,7 @@ func Connect(s ...Settings) (*Connection, error) {
 		log.Error(err)
 		return &connection, err
 	}
-	evo.Dump(connection.Certificate)
+
 	j, err := connection.UpdateAdminToken(config.Realm)
 	if err != nil {
 		log.Error(err)

@@ -68,7 +68,10 @@ func setFieldValues(user interface{}, keycloakUser *UserInstance) (error, string
 	for keycloakRef.Kind() == reflect.Ptr {
 		keycloakRef = keycloakRef.Elem()
 	}
-	var userRef = reflect.ValueOf(user).Elem()
+	var userRef = reflect.ValueOf(user)
+	for userRef.Kind() == reflect.Ptr {
+		userRef = userRef.Elem()
+	}
 	for _, field := range userModel.Schema.Fields {
 		r := userRef.FieldByName(field.Name)
 		f := keycloakRef.FieldByName(field.Name)

@@ -46,13 +46,17 @@ func (connection *Connection) EditUserFromStruct(user interface{}) error {
 }
 
 func getUUID(user interface{}) string {
+	var ref = reflect.ValueOf(user)
+	for ref.Kind() == reflect.Ptr {
+		ref = ref.Elem()
+	}
 	for _, field := range userModel.Schema.Fields {
 		if field.Name == "UUID" {
-			return sprint(reflect.ValueOf(user).Elem().FieldByName(field.Name))
+			return sprint(ref.FieldByName(field.Name))
 		}
 		var chunks = strings.Split(field.Tag.Get("keycloak"), ":")
 		if len(chunks) == 2 && chunks[0] == "field" && chunks[1] == "UUID" {
-			return sprint(reflect.ValueOf(user).Elem().FieldByName(field.Name))
+			return sprint(ref.FieldByName(field.Name))
 		}
 	}
 	return ""

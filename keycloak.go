@@ -64,7 +64,10 @@ func getUUID(user interface{}) string {
 
 func setFieldValues(user interface{}, keycloakUser *UserInstance) (error, string) {
 	var uuidField string
-	var keycloakRef = reflect.ValueOf(keycloakUser).Elem()
+	var keycloakRef = reflect.ValueOf(keycloakUser)
+	for keycloakRef.Kind() == reflect.Ptr {
+		keycloakRef = keycloakRef.Elem()
+	}
 	var userRef = reflect.ValueOf(user).Elem()
 	for _, field := range userModel.Schema.Fields {
 		r := userRef.FieldByName(field.Name)

@@ -25,7 +25,7 @@ func migrate() {
 }
 
 func MigrateFields(model *schema.Model) {
-	log.Info("Migrating keycloak fields for model:", model.Name)
+	log.Infof("Migrating keycloak fields for model:%s", model.Name)
 	for _, field := range model.Schema.Fields {
 		var tag = field.Tag.Get("keycloak")
 		var chunks = strings.Split(tag, ":")

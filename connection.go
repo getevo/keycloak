@@ -161,7 +161,7 @@ func (connection *Connection) Login(username, password string) (*JWT, error) {
 
 	var parsed = gjson.Parse(result.String())
 	if parsed.Get("error").String() != "" {
-		return nil, fmt.Errorf(parsed.Get("error").String() + ", " + parsed.Get("error_description").String())
+		return nil, fmt.Errorf(parsed.Get("error").String())
 	}
 	var j JWT
 	err = json.Unmarshal(result.Bytes(), &j)
@@ -284,8 +284,6 @@ func (connection *Connection) CreateUser(user *UserInstance) error {
 		return fmt.Errorf(parsed.Get("error").String())
 	}
 	if result.Response().StatusCode > 299 {
-		log.Error(fmt.Errorf("unable to create user"))
-		log.Error(result.Dump())
 		return fmt.Errorf("unable to create user")
 	}
 	err = json.Unmarshal(result.Bytes(), &user)

@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"fmt"
 	"github.com/getevo/evo/v2/lib/errors"
 	"net/http"
 )
@@ -19,6 +20,7 @@ var (
 
 func HTTPError(err error) errors.HTTPError {
 	var resp errors.HTTPError
+	fmt.Println("error:", err.Error())
 	switch err.Error() {
 	case "invalid_client":
 		resp = ErrorInvalidClient

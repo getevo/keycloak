@@ -8,11 +8,7 @@ import (
 var (
 	ErrorInvalidClient           = errors.New(http.StatusUnauthorized, "Invalid client")
 	ErrorInvalidToken            = errors.New(http.StatusUnauthorized, "Invalid token")
-	ErrorExpiredToken            = errors.New(http.StatusUnauthorized, "Expired token")
 	ErrorInsufficientScope       = errors.New(http.StatusForbidden, "Insufficient scope")
-	ErrorInvalidGrantType        = errors.New(http.StatusBadRequest, "Invalid grant type")
-	ErrorUnsupportedResponseType = errors.New(http.StatusBadRequest, "Unsupported response type")
-	ErrorInvalidRedirectURI      = errors.New(http.StatusBadRequest, "Invalid redirect URI")
 	ErrorInvalidUsernamePassword = errors.New(http.StatusUnauthorized, "Invalid username or password")
 	ErrorUserAccountDisabled     = errors.New(http.StatusUnauthorized, "User account is disabled")
 	ErrorInvalidRequest          = errors.New(http.StatusBadRequest, "Invalid request")
@@ -27,7 +23,7 @@ func HTTPError(err error) errors.HTTPError {
 	case "invalid_client":
 		resp = ErrorInvalidClient
 	case "invalid_grant":
-		resp = ErrorInvalidGrantType
+		resp = ErrorInvalidUsernamePassword
 	case "invalid_request":
 		resp = ErrorInvalidRequest
 	case "invalid_scope":
@@ -38,6 +34,8 @@ func HTTPError(err error) errors.HTTPError {
 		resp = ErrorInsufficientScope
 	case "duplicate user":
 		resp = ErrorDuplicateUser
+	case "user account disabled":
+		resp = ErrorUserAccountDisabled
 	default:
 		resp = ErrorUnknownError
 	}

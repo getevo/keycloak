@@ -1,7 +1,6 @@
 package keycloak
 
 import (
-	"fmt"
 	"github.com/getevo/evo/v2/lib/errors"
 	"net/http"
 )
@@ -15,12 +14,11 @@ var (
 	ErrorInvalidRequest          = errors.New(http.StatusBadRequest, "Invalid request")
 	ErrorInvalidScope            = errors.New(http.StatusUnauthorized, "Invalid scope")
 	ErrorDuplicateUser           = errors.New(http.StatusConflict, "User already exists")
-	ErrorUnknownError            = errors.New(http.StatusPreconditionFailed, "Unknown error")
+	ErrorUnknownReason           = errors.New("unknown", 451)
 )
 
 func HTTPError(err error) errors.HTTPError {
 	var resp errors.HTTPError
-	fmt.Println("error:", err.Error())
 	switch err.Error() {
 	case "invalid_client":
 		resp = ErrorInvalidClient
@@ -39,7 +37,7 @@ func HTTPError(err error) errors.HTTPError {
 	case "user account disabled":
 		resp = ErrorUserAccountDisabled
 	default:
-		resp = ErrorUnknownError
+		resp = ErrorUnknownReason
 	}
 	return resp
 }

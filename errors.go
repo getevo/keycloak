@@ -14,6 +14,10 @@ var (
 	ErrorInvalidRequest          = errors.New(http.StatusBadRequest, "Invalid request")
 	ErrorInvalidScope            = errors.New(http.StatusUnauthorized, "Invalid scope")
 	ErrorDuplicateUser           = errors.New(http.StatusConflict, "User already exists")
+	ErrorUnauthorizedClient      = errors.New(http.StatusUnauthorized, "Unauthorized client")
+	ErrorUnsupportedGrantType    = errors.New(http.StatusBadRequest, "Unsupported grant type")
+	ErrorServerError             = errors.New(http.StatusInternalServerError, "Server error")
+	ErrorTemporarilyUnavailable  = errors.New(http.StatusServiceUnavailable, "Temporarily unavailable")
 	ErrorUnknownReason           = errors.New("unknown", 451)
 )
 
@@ -36,6 +40,14 @@ func HTTPError(err error) errors.HTTPError {
 		resp = ErrorDuplicateUser
 	case "user account disabled":
 		resp = ErrorUserAccountDisabled
+	case "unauthorized_client":
+		resp = ErrorUnauthorizedClient
+	case "unsupported_grant_type":
+		resp = ErrorUnsupportedGrantType
+	case "server_error":
+		resp = ErrorServerError
+	case "temporarily_unavailable":
+		resp = ErrorTemporarilyUnavailable
 	default:
 		resp = ErrorUnknownReason
 	}

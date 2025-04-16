@@ -191,6 +191,10 @@ func EditUser(user interface{}) error {
 	return conn.EditUserFromStruct(user)
 }
 
+func DeleteUser(uuid string) error {
+	return conn.DeleteUser(uuid)
+}
+
 func Login(username, password string) (*JWT, error) {
 	return conn.Login(username, password)
 }

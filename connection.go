@@ -344,6 +344,26 @@ func (connection *Connection) EditUser(user *UserInstance) error {
 	return nil
 }
 
+func (connection *Connection) DeleteUser(uuid string) error {
+	var endpoint = "auth/admin"
+	if connection.Settings.Version >= 18 {
+		endpoint = "admin"
+	}
+	result, err := connection.Delete(endpoint, "/users/"+uuid, curl.Header{
+		"Authorization": "Bearer " + connection.Admin.AccessToken,
+	})
+	if err != nil {
+		return err
+	}
+
+	var parsed = gjson.Parse(result.String())
+	if parsed.Get("error").String() != "" {
+		return fmt.Errorf(parsed.Get("error").String())
+	}
+
+	return nil
+}
+
 // GetUser retrieves a user with the specified ID from the admin API.
 // It returns the user object and any error encountered.
 func (connection *Connection) GetUser(id string) (UserInstance, error) {
@@ -422,6 +442,26 @@ func (connection *Connection) Put(endpoint string, query string, data ...interfa
 
 	var url = strings.Trim(connection.Settings.Server+endpoint, "/") + "/realms/" + connection.Settings.Realm + query
 	resp, err := curl.Put(url, data...)
+	if err != nil {
+		return nil, err
+	}
+	if connection.Settings.Debug {
+		fmt.Println(resp.Dump())
+	}
+	resp, err = handleRedirect(resp)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Response().StatusCode == 204 {
+		return resp, nil
+	}
+	return resp, nil
+}
+
+func (connection *Connection) Delete(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
+
+	var url = strings.Trim(connection.Settings.Server+endpoint, "/") + "/realms/" + connection.Settings.Realm + query
+	resp, err := curl.Delete(url, data...)
 	if err != nil {
 		return nil, err
 	}

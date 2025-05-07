@@ -17,6 +17,7 @@ import (
 )
 
 var conn *Connection
+var timeout = 5 * time.Second
 
 func GetInstance() *Connection {
 	return conn
@@ -31,7 +32,7 @@ func (connection *Connection) UpdateAdminToken(realm string) (*JWT, error) {
 		"client_id":     connection.Settings.Client,
 		"client_secret": connection.Settings.ClientSecret,
 		"grant_type":    "client_credentials",
-	})
+	}, timeout)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +190,7 @@ func (connection *Connection) ChangePassword(user *UserInstance, password string
 			"type":      "password",
 			"value":     password,
 		},
-	))
+	), timeout)
 	if err != nil {
 		return err
 	}
@@ -210,7 +211,7 @@ func (connection *Connection) SetCredentials(user *UserInstance, credentials Cre
 		"Authorization": "Bearer " + connection.Admin.AccessToken,
 	}, curl.BodyJSON(
 		credentials,
-	))
+	), timeout)
 	if err != nil {
 		return err
 	}
@@ -270,7 +271,7 @@ func (connection *Connection) CreateUser(user *UserInstance) error {
 	}
 	result, err := connection.Post(endpoint, "/users", curl.Header{
 		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	}, curl.BodyJSON(user))
+	}, curl.BodyJSON(user), timeout)
 
 	if err != nil && err.Error() != "unexpected end of JSON input" {
 		return err
@@ -439,7 +440,7 @@ func (connection *Connection) Debug(state bool) {
 // - *curl.Resp: The response from the PUT request.
 // - error: Any error that occurred during the request.
 func (connection *Connection) Put(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
-
+	data = append(data, timeout)
 	var url = strings.Trim(connection.Settings.Server+endpoint, "/") + "/realms/" + connection.Settings.Realm + query
 	resp, err := curl.Put(url, data...)
 	if err != nil {
@@ -459,7 +460,7 @@ func (connection *Connection) Put(endpoint string, query string, data ...interfa
 }
 
 func (connection *Connection) Delete(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
-
+	data = append(data, timeout)
 	var url = strings.Trim(connection.Settings.Server+endpoint, "/") + "/realms/" + connection.Settings.Realm + query
 	resp, err := curl.Delete(url, data...)
 	if err != nil {
@@ -480,6 +481,7 @@ func (connection *Connection) Delete(endpoint string, query string, data ...inte
 
 // Post sends a POST request to the specified endpoint with optional query parameters and data. It returns the response and an error if any.
 func (connection *Connection) Post(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
+	data = append(data, timeout)
 	var url = strings.Trim(connection.Settings.Server+endpoint, "/") + "/realms/" + connection.Settings.Realm + query
 	resp, err := curl.Post(url, data...)
 	if err != nil {
@@ -520,6 +522,7 @@ func handleRedirect(resp *curl.Resp) (*curl.Resp, error) {
 // - *curl.Resp: the response object containing the HTTP response information.
 // - error: any error that occurred during the request.
 func (connection *Connection) Get(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
+	data = append(data, timeout)
 	var url = strings.Trim(connection.Settings.Server+endpoint, "/") + "/realms/" + connection.Settings.Realm + query
 	resp, err := curl.Get(url, data...)
 	if err != nil {
@@ -691,7 +694,7 @@ func (connection *Connection) LogoutSession(session *Session) error {
 	var url = connection.Settings.Server + "/admin/realms/" + connection.Settings.Realm + "/sessions/" + session.ID
 	resp, err := curl.Delete(url, curl.Header{
 		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	})
+	}, timeout)
 	if err != nil {
 		return err
 	}
@@ -710,7 +713,7 @@ func (connection *Connection) LogoutAllSessions(user *UserInstance) error {
 	var url = connection.Settings.Server + "/admin/realms/" + connection.Settings.Realm + "/users/" + user.UUID + "/logout"
 	resp, err := curl.Post(url, curl.Header{
 		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	})
+	}, timeout)
 	if err != nil {
 		return err
 	}
@@ -752,7 +755,7 @@ func Connect(s ...Settings) (*Connection, error) {
 	if config.Version >= 18 {
 		auth = ""
 	}
-	resp, err := curl.Get(fmt.Sprintf("%s%s/realms/%s/protocol/openid-connect/certs", strings.Trim(config.Server, "/"), auth, config.Realm))
+	resp, err := curl.Get(fmt.Sprintf("%s%s/realms/%s/protocol/openid-connect/certs", strings.Trim(config.Server, "/"), auth, config.Realm), timeout)
 	if err != nil {
 		return &connection, err
 	}

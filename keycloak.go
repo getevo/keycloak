@@ -26,7 +26,6 @@ func (connection *Connection) EditUserFromStruct(user interface{}) error {
 	if err != nil {
 		return err
 	}
-
 	err, _ = setFieldValues(user, &keycloakUser)
 
 	if err != nil {
@@ -65,6 +64,9 @@ func getUUID(user interface{}) string {
 func setFieldValues(user interface{}, keycloakUser *UserInstance) (error, string) {
 	var uuidField string
 	var keycloakRef = reflect.ValueOf(keycloakUser)
+	if keycloakUser.Attributes == nil {
+		keycloakUser.Attributes = Attributes{}
+	}
 	for keycloakRef.Kind() == reflect.Ptr {
 		keycloakRef = keycloakRef.Elem()
 	}

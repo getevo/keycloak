@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"fmt"
-	"github.com/getevo/evo/v2"
 	"github.com/getevo/evo/v2/lib/db/schema"
 	"github.com/getevo/evo/v2/lib/text"
 	"reflect"
@@ -34,7 +33,6 @@ func (connection *Connection) EditUserFromStruct(user interface{}) error {
 	}
 
 	if keycloakUser.Credentials != nil && len(*keycloakUser.Credentials) > 0 && (*keycloakUser.Credentials)[0].Value != "" {
-		evo.Dump((*keycloakUser.Credentials)[0])
 		err = connection.ChangePassword(&keycloakUser, (*keycloakUser.Credentials)[0].Value)
 		if err != nil {
 			return err

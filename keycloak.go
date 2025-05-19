@@ -32,7 +32,7 @@ func (connection *Connection) EditUserFromStruct(user interface{}) error {
 		return err
 	}
 	if keycloakUser.Credentials != nil && len(*keycloakUser.Credentials) > 0 && (*keycloakUser.Credentials)[0].Value != "" {
-		err = connection.SetCredentials(&keycloakUser, (*keycloakUser.Credentials)[0])
+		err = connection.ChangePassword(&keycloakUser, (*keycloakUser.Credentials)[0].Value)
 		if err != nil {
 			return err
 		}

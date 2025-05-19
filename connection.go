@@ -181,7 +181,11 @@ func (connection *Connection) Login(username, password string) (*JWT, error) {
 // If any error occurs during the request or parsing of the response, it returns the error.
 // If the response status code is not 204 and the error message is empty, it returns an error message "unable to change password".
 func (connection *Connection) ChangePassword(user *UserInstance, password string) error {
-	var url = connection.Settings.Server + "/admin/realms/" + connection.Settings.Realm + "/users/" + user.UUID + "/reset-password"
+	var endpoint = "auth"
+	if connection.Settings.Version >= 18 {
+		endpoint = ""
+	}
+	var url = connection.Settings.Server + endpoint + "/admin/realms/" + connection.Settings.Realm + "/users/" + user.UUID + "/reset-password"
 	resp, err := curl.Put(url, curl.Header{
 		"Authorization": "Bearer " + connection.Admin.AccessToken,
 	}, curl.BodyJSON(
@@ -198,6 +202,9 @@ func (connection *Connection) ChangePassword(user *UserInstance, password string
 		return nil
 	}
 	var result = gjson.Parse(resp.String())
+	if connection.Settings.Debug {
+		fmt.Println(resp.Dump())
+	}
 	if result.Get("error").String() != "" {
 		return fmt.Errorf(result.Get("error").String())
 	}

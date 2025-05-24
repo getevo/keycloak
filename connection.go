@@ -9,11 +9,10 @@ import (
 	"github.com/getevo/evo/v2/lib/settings"
 	"github.com/getevo/evo/v2/lib/text"
 	"github.com/go-jose/go-jose/v4"
-	"strings"
-	"time"
-
 	"github.com/go-jose/go-jose/v4/jwt"
 	"github.com/tidwall/gjson"
+	"strings"
+	"time"
 )
 
 var conn *Connection
@@ -24,11 +23,7 @@ func GetInstance() *Connection {
 }
 
 func (connection *Connection) UpdateAdminToken(realm string) (*JWT, error) {
-	var endpoint = "auth"
-	if connection.Settings.Version >= 18 {
-		endpoint = ""
-	}
-	result, err := connection.Post(endpoint, "/protocol/openid-connect/token", curl.Param{
+	result, err := connection.Post("", "/protocol/openid-connect/token", curl.Param{
 		"client_id":     connection.Settings.Client,
 		"client_secret": connection.Settings.ClientSecret,
 		"grant_type":    "client_credentials",
@@ -145,11 +140,7 @@ func (connection *Connection) Block(user *UserInstance) error {
 // It returns a JWT (JSON Web Token) and an error if any.
 // The JWT contains access token, ID token, expiration duration, refresh expiration duration, refresh token, token type, not before policy, session state, and scope.
 func (connection *Connection) Login(username, password string) (*JWT, error) {
-	var endpoint = "auth"
-	if connection.Settings.Version >= 18 {
-		endpoint = ""
-	}
-	result, err := connection.Post(endpoint, "/protocol/openid-connect/token", curl.Param{
+	result, err := connection.Post("", "/protocol/openid-connect/token", curl.Param{
 		"username":      username,
 		"password":      password,
 		"client_id":     connection.Settings.Client,
@@ -181,20 +172,11 @@ func (connection *Connection) Login(username, password string) (*JWT, error) {
 // If any error occurs during the request or parsing of the response, it returns the error.
 // If the response status code is not 204 and the error message is empty, it returns an error message "unable to change password".
 func (connection *Connection) ChangePassword(user *UserInstance, password string) error {
-	var endpoint = "auth"
-	if connection.Settings.Version >= 18 {
-		endpoint = ""
-	}
-	var url = connection.Settings.Server + endpoint + "/admin/realms/" + connection.Settings.Realm + "/users/" + user.UUID + "/reset-password"
-	resp, err := curl.Put(url, curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	}, curl.BodyJSON(
-		map[string]interface{}{
-			"temporary": false,
-			"type":      "password",
-			"value":     password,
-		},
-	), timeout)
+	resp, err := connection.Put("admin", "/users/"+user.UUID+"/reset-password", map[string]interface{}{
+		"temporary": false,
+		"type":      "password",
+		"value":     password,
+	})
 	if err != nil {
 		return err
 	}
@@ -208,32 +190,6 @@ func (connection *Connection) ChangePassword(user *UserInstance, password string
 	if result.Get("error").String() != "" {
 		return fmt.Errorf(result.Get("error").String())
 	}
-
-	return fmt.Errorf("unable to change password")
-}
-
-func (connection *Connection) SetCredentials(user *UserInstance, credentials Credentials) error {
-	var endpoint = "auth"
-	if connection.Settings.Version >= 18 {
-		endpoint = ""
-	}
-	var url = connection.Settings.Server + endpoint + "/admin/realms/" + connection.Settings.Realm + "/users/" + user.UUID + "/reset-password"
-	resp, err := curl.Put(url, curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	}, curl.BodyJSON(
-		credentials,
-	), timeout)
-	if err != nil {
-		return err
-	}
-	if resp.Response().StatusCode == 204 {
-		return nil
-	}
-	var result = gjson.Parse(resp.String())
-	if result.Get("error").String() != "" {
-		return fmt.Errorf(result.Get("error").String())
-	}
-
 	return fmt.Errorf("unable to change password")
 }
 
@@ -276,11 +232,7 @@ func (connection *Connection) ResetPasswordRequest(user *UserInstance) (Reset, e
 // It takes a reference to a Connection object and a pointer to a User object.
 // It returns an error if any during the creation process.
 func (connection *Connection) CreateUser(user *UserInstance) error {
-	var endpoint = "auth/admin"
-	if connection.Settings.Version >= 18 {
-		endpoint = "admin"
-	}
-	result, err := connection.Post(endpoint, "/users", curl.Header{
+	result, err := connection.Post("admin", "/users", curl.Header{
 		"Authorization": "Bearer " + connection.Admin.AccessToken,
 	}, curl.BodyJSON(user), timeout)
 
@@ -307,17 +259,15 @@ func (connection *Connection) CreateUser(user *UserInstance) error {
 
 // RefreshToken sends a request to refresh the JWT token using the provided refresh token.
 func (connection *Connection) RefreshToken(refreshToken string) (*JWT, error) {
-	var endpoint = "auth"
-	if connection.Settings.Version >= 18 {
-		endpoint = ""
-	}
-	result, err := connection.Post(endpoint, "/protocol/openid-connect/token", curl.Param{
+	result, err := connection.Post("", "/protocol/openid-connect/token", curl.Param{
 		"client_id":     connection.Settings.Client,
 		"grant_type":    "refresh_token",
 		"refresh_token": refreshToken,
 		"client_secret": connection.Settings.ClientSecret,
 	})
-
+	if err != nil {
+		return nil, err
+	}
 	var parsed = gjson.Parse(result.String())
 	if parsed.Get("error").String() != "" {
 		return nil, fmt.Errorf(parsed.Get("error").String())
@@ -337,11 +287,7 @@ func (connection *Connection) RefreshToken(refreshToken string) (*JWT, error) {
 // Returns an error if there is a problem with the API request or if the API returns an error message.
 // If the API request is successful, the User object in the connection object is updated with the modified information.
 func (connection *Connection) EditUser(user *UserInstance) error {
-	var endpoint = "auth/admin"
-	if connection.Settings.Version >= 18 {
-		endpoint = "admin"
-	}
-	result, err := connection.Put(endpoint, "/users/"+user.UUID, curl.Header{
+	result, err := connection.Put("admin", "/users/"+user.UUID, curl.Header{
 		"Authorization": "Bearer " + connection.Admin.AccessToken,
 	}, curl.BodyJSON(user))
 	if err != nil {
@@ -357,11 +303,7 @@ func (connection *Connection) EditUser(user *UserInstance) error {
 }
 
 func (connection *Connection) DeleteUser(uuid string) error {
-	var endpoint = "auth/admin"
-	if connection.Settings.Version >= 18 {
-		endpoint = "admin"
-	}
-	result, err := connection.Delete(endpoint, "/users/"+uuid, curl.Header{
+	result, err := connection.Delete("admin", "/users/"+uuid, curl.Header{
 		"Authorization": "Bearer " + connection.Admin.AccessToken,
 	})
 	if err != nil {
@@ -380,11 +322,7 @@ func (connection *Connection) DeleteUser(uuid string) error {
 // It returns the user object and any error encountered.
 func (connection *Connection) GetUser(id string) (UserInstance, error) {
 	var user UserInstance
-	var endpoint = "auth/admin"
-	if connection.Settings.Version >= 18 {
-		endpoint = "/admin"
-	}
-	result, err := connection.Get(endpoint, "/users/"+id, curl.Header{
+	result, err := connection.Get("admin", "/users/"+id, curl.Header{
 		"Authorization": "Bearer " + connection.Admin.AccessToken,
 	})
 	if err != nil {
@@ -442,110 +380,6 @@ func (connection *Connection) Debug(state bool) {
 	connection.Settings.Debug = state
 }
 
-// Put sends a PUT request to the specified endpoint with the provided query strings and data. It returns a curl.Resp and an error.
-// Parameters:
-// - endpoint: The endpoint path to send the request to.
-// - query: The query string to be appended to the endpoint URL.
-// - data: Optional data to be included in the request body.
-// Returns:
-// - *curl.Resp: The response from the PUT request.
-// - error: Any error that occurred during the request.
-func (connection *Connection) Put(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
-	data = append(data, timeout)
-	var url = strings.Trim(connection.Settings.Server+endpoint, "/") + "/realms/" + connection.Settings.Realm + query
-	resp, err := curl.Put(url, data...)
-	if err != nil {
-		return nil, err
-	}
-	if connection.Settings.Debug {
-		fmt.Println(resp.Dump())
-	}
-	resp, err = handleRedirect(resp)
-	if err != nil {
-		return nil, err
-	}
-	if resp.Response().StatusCode == 204 {
-		return resp, nil
-	}
-	return resp, nil
-}
-
-func (connection *Connection) Delete(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
-	data = append(data, timeout)
-	var url = strings.Trim(connection.Settings.Server+endpoint, "/") + "/realms/" + connection.Settings.Realm + query
-	resp, err := curl.Delete(url, data...)
-	if err != nil {
-		return nil, err
-	}
-	if connection.Settings.Debug {
-		fmt.Println(resp.Dump())
-	}
-	resp, err = handleRedirect(resp)
-	if err != nil {
-		return nil, err
-	}
-	if resp.Response().StatusCode == 204 {
-		return resp, nil
-	}
-	return resp, nil
-}
-
-// Post sends a POST request to the specified endpoint with optional query parameters and data. It returns the response and an error if any.
-func (connection *Connection) Post(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
-	data = append(data, timeout)
-	var url = strings.Trim(connection.Settings.Server+endpoint, "/") + "/realms/" + connection.Settings.Realm + query
-	resp, err := curl.Post(url, data...)
-	if err != nil {
-		return nil, err
-	}
-	if connection.Settings.Debug {
-		fmt.Println(resp.Dump())
-	}
-	resp, err = handleRedirect(resp)
-	if resp.Response().StatusCode == 204 {
-		return resp, nil
-	}
-	return resp, nil
-}
-
-// handleRedirect redirects the response to the location specified in the "location" header, if present.
-// It uses the curl.Get function to make a new request to the location. If there is an error during the request, it returns nil and the error.
-// If there is no "location" header or there is no error, it returns the original response and nil error.
-func handleRedirect(resp *curl.Resp) (*curl.Resp, error) {
-	var err error
-	if resp.Response().Header.Get("location") != "" {
-		resp, err = curl.Get(resp.Response().Header.Get("location"), resp.Request().Header)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
-}
-
-// Get method sends a GET request to the specified endpoint with optional query parameters and data.
-//
-// Parameters:
-// - endpoint: the endpoint URL string to send the request to.
-// - query: the query string to include in the request URL.
-// - data: optional variadic parameter to include data in the request body.
-//
-// Returns:
-// - *curl.Resp: the response object containing the HTTP response information.
-// - error: any error that occurred during the request.
-func (connection *Connection) Get(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
-	data = append(data, timeout)
-	var url = strings.Trim(connection.Settings.Server+endpoint, "/") + "/realms/" + connection.Settings.Realm + query
-	resp, err := curl.Get(url, data...)
-	if err != nil {
-		return nil, err
-	}
-	if connection.Settings.Debug {
-		fmt.Println(resp.Dump())
-	}
-	resp, err = handleRedirect(resp)
-	return resp, nil
-}
-
 // VerifyOffline verifies the offline access token and extracts the claims from it.
 // It takes the accessToken string and claims interface{}, and returns a Spec and an error.
 //
@@ -591,11 +425,8 @@ func (connection *Connection) ParseToken(accessToken string, claims interface{},
 // VerifyOnline verifies if a token is valid by making a POST request to the token introspection endpoint.
 // It takes a token as input and returns an error if the token is invalid.
 func (connection *Connection) VerifyOnline(token string) error {
-	var endpoint = "auth"
-	if connection.Settings.Version >= 18 {
-		endpoint = ""
-	}
-	var result, err = connection.Post(endpoint, "/protocol/openid-connect/token/introspect", curl.Param{
+
+	var result, err = connection.Post("", "/protocol/openid-connect/token/introspect", curl.Param{
 		"client_id":     connection.Settings.Client,
 		"client_secret": connection.Settings.ClientSecret,
 		"token":         token,
@@ -642,11 +473,8 @@ func (connection *Connection) Impersonate(user *UserInstance, internalToken bool
 	if internalToken {
 		requestTokenType = "urn:ietf:params:oauth:token-type:refresh_token"
 	}
-	var endpoint = "auth"
-	if connection.Settings.Version >= 18 {
-		endpoint = ""
-	}
-	result, err := connection.Post(endpoint, "/protocol/openid-connect/token", curl.Header{
+
+	result, err := connection.Post("auth", "/protocol/openid-connect/token", curl.Header{
 		"Authorization": "Bearer " + connection.Admin.AccessToken,
 	}, curl.Param{
 		"requested_subject":    user.UUID,
@@ -674,11 +502,7 @@ func (connection *Connection) Impersonate(user *UserInstance, internalToken bool
 // Sessions returns a list of sessions for the specified user.
 func (connection *Connection) Sessions(u *UserInstance) ([]Session, error) {
 	var sessions []Session
-	var endpoint = "auth/admin"
-	if connection.Settings.Version >= 18 {
-		endpoint = "/admin"
-	}
-	var result, err = connection.Get(endpoint, "/users/"+u.UUID+"/sessions", curl.Header{
+	var result, err = connection.Get("admin", "/users/"+u.UUID+"/sessions", curl.Header{
 		"Authorization": "Bearer " + connection.Admin.AccessToken,
 	})
 	if err != nil {
@@ -702,10 +526,7 @@ func (connection *Connection) Sessions(u *UserInstance) ([]Session, error) {
 // If the response status code is 204, it means the logout was successful and nil error is returned.
 // Otherwise, an error is returned indicating the failure to logout.
 func (connection *Connection) LogoutSession(session *Session) error {
-	var url = connection.Settings.Server + "/admin/realms/" + connection.Settings.Realm + "/sessions/" + session.ID
-	resp, err := curl.Delete(url, curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	}, timeout)
+	resp, err := connection.Delete("admin", "/sessions/"+session.ID)
 	if err != nil {
 		return err
 	}
@@ -721,10 +542,7 @@ func (connection *Connection) LogoutSession(session *Session) error {
 // If the request is successful and the server returns a 204 status code, nil error is returned.
 // If the request fails or the server returns a different status code, an error is returned with the message "unable to logout".
 func (connection *Connection) LogoutAllSessions(user *UserInstance) error {
-	var url = connection.Settings.Server + "/admin/realms/" + connection.Settings.Realm + "/users/" + user.UUID + "/logout"
-	resp, err := curl.Post(url, curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	}, timeout)
+	resp, err := connection.Post("admin", "/users/"+user.UUID+"/logout")
 	if err != nil {
 		return err
 	}
@@ -748,7 +566,7 @@ func Connect(s ...Settings) (*Connection, error) {
 			ClientSecret: settings.Get("AUTH.KEYCLOAK.SECRET").String(),
 			Client:       settings.Get("AUTH.KEYCLOAK.CLIENT").String(),
 			Debug:        settings.Get("AUTH.KEYCLOAK.DEBUG").Bool(),
-			Version:      settings.Get("AUTH.KEYCLOAK.VERSION").Int(),
+			BasePath:     settings.Get("AUTH.KEYCLOAK.BASEPATH").String(),
 		}
 	} else {
 		config = s[0]
@@ -762,11 +580,7 @@ func Connect(s ...Settings) (*Connection, error) {
 			conn = &connection
 		}
 	}()
-	var auth = "/auth"
-	if config.Version >= 18 {
-		auth = ""
-	}
-	resp, err := curl.Get(fmt.Sprintf("%s%s/realms/%s/protocol/openid-connect/certs", strings.Trim(config.Server, "/"), auth, config.Realm), timeout)
+	resp, err := connection.Get("", "protocol/openid-connect/certs")
 	if err != nil {
 		return &connection, err
 	}

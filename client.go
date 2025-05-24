@@ -6,11 +6,7 @@ import (
 )
 
 func getClient() {
-	var endpoint = "auth/admin"
-	if conn.Settings.Version >= 18 {
-		endpoint = "admin"
-	}
-	post, err := conn.Get(endpoint, "/clients", curl.Header{
+	post, err := conn.Get("/admin", "/clients", curl.Header{
 		"Authorization": "Bearer " + conn.Admin.AccessToken,
 	})
 	if err != nil {

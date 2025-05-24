@@ -41,8 +41,8 @@ type Settings struct {
 	Realm        string `json:"realm"`
 	Client       string `json:"client"`
 	ClientSecret string `json:"client_secret"`
+	BasePath     string `json:"basepath"`
 	Debug        bool   `json:"debug"`
-	Version      int    `json:"version"`
 }
 
 // UserAddress represents a user's address information.

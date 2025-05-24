@@ -38,6 +38,9 @@ type Connection struct {
 
 func (connection *Connection) PrepareRequest(data []interface{}) []interface{} {
 	data = append(data, timeout)
+	if connection.Admin == nil {
+		return data
+	}
 	var hasHeader = false
 	for idx, _ := range data {
 		if headers, ok := data[idx].(curl.Header); ok {

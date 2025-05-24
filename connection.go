@@ -268,6 +268,9 @@ func (connection *Connection) RefreshToken(refreshToken string) (*JWT, error) {
 	if err != nil {
 		return nil, err
 	}
+	if connection.Settings.Debug {
+		fmt.Println(result.Dump())
+	}
 	var parsed = gjson.Parse(result.String())
 	if parsed.Get("error").String() != "" {
 		return nil, fmt.Errorf(parsed.Get("error").String())

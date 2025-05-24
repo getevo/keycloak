@@ -7,12 +7,17 @@ func join(parts ...string) string {
 		return ""
 	}
 	var url = ""
+	var v string
 	for i, item := range parts {
 		if i == 0 {
 			url = strings.Trim(item, "/")
 			continue
 		}
-		url += "/" + strings.Trim(item, "/")
+		v = strings.Trim(item, "/")
+		if v == "" {
+			continue
+		}
+		url += "/" + v
 	}
 	return url
 }

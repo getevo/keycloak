@@ -3,7 +3,6 @@ package keycloak
 import (
 	"fmt"
 	"github.com/getevo/evo/v2/lib/curl"
-	"path/filepath"
 )
 
 // Put sends a PUT request to the specified endpoint with the provided query strings and data. It returns a curl.Resp and an error.

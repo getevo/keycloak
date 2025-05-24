@@ -16,7 +16,7 @@ import (
 // - error: Any error that occurred during the request.
 func (connection *Connection) Put(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
 	data = append(data, timeout)
-	var url = filepath.Join(connection.Settings.Server, connection.Settings.BasePath, endpoint, "realms", connection.Settings.Realm, query)
+	var url = join(connection.Settings.Server, connection.Settings.BasePath, endpoint, "realms", connection.Settings.Realm, query)
 	resp, err := curl.Put(url, data...)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (connection *Connection) Put(endpoint string, query string, data ...interfa
 
 func (connection *Connection) Delete(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
 	data = append(data, timeout)
-	var url = filepath.Join(connection.Settings.Server, connection.Settings.BasePath, endpoint, "realms", connection.Settings.Realm, query)
+	var url = join(connection.Settings.Server, connection.Settings.BasePath, endpoint, "realms", connection.Settings.Realm, query)
 	resp, err := curl.Delete(url, data...)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (connection *Connection) Delete(endpoint string, query string, data ...inte
 // Post sends a POST request to the specified endpoint with optional query parameters and data. It returns the response and an error if any.
 func (connection *Connection) Post(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
 	data = append(data, timeout)
-	var url = filepath.Join(connection.Settings.Server, connection.Settings.BasePath, endpoint, "realms", connection.Settings.Realm, query)
+	var url = join(connection.Settings.Server, connection.Settings.BasePath, endpoint, "realms", connection.Settings.Realm, query)
 	resp, err := curl.Post(url, data...)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (connection *Connection) Post(endpoint string, query string, data ...interf
 // - error: any error that occurred during the request.
 func (connection *Connection) Get(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
 	data = append(data, timeout)
-	var url = filepath.Join(connection.Settings.Server, connection.Settings.BasePath, endpoint, "realms", connection.Settings.Realm, query)
+	var url = join(connection.Settings.Server, connection.Settings.BasePath, endpoint, "realms", connection.Settings.Realm, query)
 	resp, err := curl.Get(url, data...)
 	if err != nil {
 		return nil, err

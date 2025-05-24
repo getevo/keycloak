@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/getevo/evo/v2"
+	"github.com/getevo/evo/v2/lib/curl"
 	"github.com/getevo/evo/v2/lib/date"
 	"github.com/getevo/evo/v2/lib/generic"
 	"github.com/go-jose/go-jose/v4"
@@ -33,6 +34,23 @@ type Connection struct {
 	Admin    *JWT
 	//Certificate jose.JSONWebKeySet
 	Certificate jose.JSONWebKeySet
+}
+
+func (connection *Connection) PrepareRequest(data []interface{}) []interface{} {
+	data = append(data, timeout)
+	var hasHeader = false
+	for idx, _ := range data {
+		if headers, ok := data[idx].(curl.Header); ok {
+			hasHeader = true
+			if _, ok := headers["Authorization"]; !ok {
+				headers["Authorization"] = "Bearer " + connection.Admin.AccessToken
+			}
+		}
+	}
+	if !hasHeader {
+		data = append(data, curl.Header{"Authorization": "Bearer " + connection.Admin.AccessToken})
+	}
+	return data
 }
 
 // Settings represents the configuration settings for connecting to a server in the application. It contains fields for the server URL, realm, client, client secret, autoconnect flag

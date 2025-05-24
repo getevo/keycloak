@@ -14,14 +14,7 @@ import (
 // - *curl.Resp: The response from the PUT request.
 // - error: Any error that occurred during the request.
 func (connection *Connection) Put(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
-	data = append(data, timeout)
-	for idx, _ := range data {
-		if headers, ok := data[idx].(curl.Header); ok {
-			if _, ok := headers["Authorization"]; !ok {
-				headers["Authorization"] = "Bearer " + connection.Admin.AccessToken
-			}
-		}
-	}
+	data = connection.PrepareRequest(data)
 	var url = join(connection.Settings.Server, connection.Settings.BasePath, endpoint, "realms", connection.Settings.Realm, query)
 	resp, err := curl.Put(url, data...)
 	if err != nil {
@@ -41,14 +34,7 @@ func (connection *Connection) Put(endpoint string, query string, data ...interfa
 }
 
 func (connection *Connection) Delete(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
-	data = append(data, timeout)
-	for idx, _ := range data {
-		if headers, ok := data[idx].(curl.Header); ok {
-			if _, ok := headers["Authorization"]; !ok {
-				headers["Authorization"] = "Bearer " + connection.Admin.AccessToken
-			}
-		}
-	}
+	data = connection.PrepareRequest(data)
 	var url = join(connection.Settings.Server, connection.Settings.BasePath, endpoint, "realms", connection.Settings.Realm, query)
 	resp, err := curl.Delete(url, data...)
 	if err != nil {
@@ -69,14 +55,7 @@ func (connection *Connection) Delete(endpoint string, query string, data ...inte
 
 // Post sends a POST request to the specified endpoint with optional query parameters and data. It returns the response and an error if any.
 func (connection *Connection) Post(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
-	data = append(data, timeout)
-	for idx, _ := range data {
-		if headers, ok := data[idx].(curl.Header); ok {
-			if _, ok := headers["Authorization"]; !ok {
-				headers["Authorization"] = "Bearer " + connection.Admin.AccessToken
-			}
-		}
-	}
+	data = connection.PrepareRequest(data)
 	var url = join(connection.Settings.Server, connection.Settings.BasePath, endpoint, "realms", connection.Settings.Realm, query)
 	resp, err := curl.Post(url, data...)
 	if err != nil {
@@ -103,14 +82,7 @@ func (connection *Connection) Post(endpoint string, query string, data ...interf
 // - *curl.Resp: the response object containing the HTTP response information.
 // - error: any error that occurred during the request.
 func (connection *Connection) Get(endpoint string, query string, data ...interface{}) (*curl.Resp, error) {
-	data = append(data, timeout)
-	for idx, _ := range data {
-		if headers, ok := data[idx].(curl.Header); ok {
-			if _, ok := headers["Authorization"]; !ok {
-				headers["Authorization"] = "Bearer " + connection.Admin.AccessToken
-			}
-		}
-	}
+	data = connection.PrepareRequest(data)
 	var url = join(connection.Settings.Server, connection.Settings.BasePath, endpoint, "realms", connection.Settings.Realm, query)
 	resp, err := curl.Get(url, data...)
 	if err != nil {

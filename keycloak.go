@@ -221,6 +221,10 @@ func LogoutSession(session *Session) error {
 	return conn.LogoutSession(session)
 }
 
+func Logout(user *UserInstance) error {
+	return conn.LogoutAllSessions(user)
+}
+
 func ChangePassword(user *UserInstance, password string) error {
 	return conn.ChangePassword(user, password)
 }

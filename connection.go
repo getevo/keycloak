@@ -172,11 +172,12 @@ func (connection *Connection) Login(username, password string) (*JWT, error) {
 // If any error occurs during the request or parsing of the response, it returns the error.
 // If the response status code is not 204 and the error message is empty, it returns an error message "unable to change password".
 func (connection *Connection) ChangePassword(user *UserInstance, password string) error {
-	resp, err := connection.Put("admin", "/users/"+user.UUID+"/reset-password", map[string]interface{}{
-		"temporary": false,
-		"type":      "password",
-		"value":     password,
-	})
+	resp, err := connection.Put("admin", "/users/"+user.UUID+"/reset-password", curl.BodyJSON(
+		map[string]interface{}{
+			"temporary": false,
+			"type":      "password",
+			"value":     password,
+		}))
 	if err != nil {
 		return err
 	}

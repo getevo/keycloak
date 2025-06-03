@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/getevo/evo/v2"
@@ -8,6 +9,7 @@ import (
 	"github.com/getevo/evo/v2/lib/date"
 	"github.com/getevo/evo/v2/lib/generic"
 	"github.com/go-jose/go-jose/v4"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -37,7 +39,14 @@ type Connection struct {
 }
 
 func (connection *Connection) PrepareRequest(data []interface{}) []interface{} {
-	data = append(data, timeout)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	var c = &http.Client{
+		Timeout:   timeout,
+		Transport: tr,
+	}
+	data = append(data, c)
 	if connection.Admin == nil {
 		return data
 	}

@@ -370,8 +370,8 @@ func (keycloakUser *UserInstance) SetFromStruct(user evo.UserInterface) {
 
 type User struct {
 	UUID          string `keycloak:"field:UUID" gorm:"column:uuid;primaryKey;size:36" json:"uuid"`
-	FirstName     string `keycloak:"field:FirstName" gorm:"column:first_name;size:255" validation:"alpha,required" json:"first_name"`
-	LastName      string `keycloak:"field:LastName" gorm:"column:last_name;size:255" validation:"alpha,required" json:"last_name"`
+	FirstName     string `keycloak:"field:FirstName" gorm:"column:first_name;size:255" validation:"name,required" json:"first_name"`
+	LastName      string `keycloak:"field:LastName" gorm:"column:last_name;size:255" validation:"name,required" json:"last_name"`
 	Email         string `keycloak:"field:Email" gorm:"column:email;size:255;unique" validation:"email,unique" json:"email"`
 	Password      string `keycloak:"field:Password" gorm:"-" json:"password"`
 	EmailVerified bool   `keycloak:"field:EmailVerified" gorm:"column:email_verified" json:"email_verified"`

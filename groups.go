@@ -67,7 +67,6 @@ func (connection *Connection) CreateGroup(group *Group) error {
 	}
 	var createdGroup Group
 	err = result.ToJSON(&createdGroup)
-	fmt.Println(result.Dump())
 	if err != nil {
 		return err
 	}
@@ -77,12 +76,12 @@ func (connection *Connection) CreateGroup(group *Group) error {
 	if createdGroup.ID == "" {
 		return fmt.Errorf("expected group ID, got empty string")
 	}
+	group.ID = createdGroup.ID
+	group.Path = createdGroup.Path
 	err = connection.UpdateGroup(group.ID, group)
 	if err != nil {
 		return err
 	}
-	group.ID = createdGroup.ID
-	group.Path = createdGroup.Path
 	return nil
 }
 

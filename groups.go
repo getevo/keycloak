@@ -9,16 +9,16 @@ type Group struct {
 	ID            string        `json:"id"`
 	Name          string        `json:"name"`
 	Path          string        `json:"path"`
-	SubGroupCount int           `json:"subGroupCount"`
-	SubGroups     []interface{} `json:"subGroups"`
+	SubGroupCount int           `json:"subGroupCount,omitempty"`
+	SubGroups     []interface{} `json:"subGroups,omitempty"`
 	Access        struct {
 		View             bool `json:"view"`
 		ViewMembers      bool `json:"viewMembers"`
 		ManageMembers    bool `json:"manageMembers"`
 		Manage           bool `json:"manage"`
 		ManageMembership bool `json:"manageMembership"`
-	} `json:"access"`
-	RealmRoles []string `json:"realmRoles"`
+	} `json:"access,omitempty"`
+	RealmRoles []string `json:"realmRoles,omitempty"`
 }
 
 func (connection *Connection) GetGroups() ([]Group, error) {
@@ -56,7 +56,10 @@ func GetGroup(id string) (*Group, error) {
 }
 
 func (connection *Connection) CreateGroup(group *Group) error {
+	//var roles = group.RealmRoles
+	group.RealmRoles = nil
 	result, err := connection.Post("/admin", "/groups", curl.BodyJSON(group))
+	fmt.Println(result.Dump())
 	if err != nil {
 		return err
 	}

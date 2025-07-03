@@ -66,6 +66,7 @@ func (connection *Connection) CreateGroup(group *Group) error {
 	}
 	var createdGroup Group
 	err = result.ToJSON(&createdGroup)
+	fmt.Println(result.Dump())
 	if err != nil {
 		return err
 	}

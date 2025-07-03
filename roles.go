@@ -1,6 +1,9 @@
 package keycloak
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/getevo/evo/v2/lib/curl"
+)
 
 type Role struct {
 	ID          string `json:"id"`
@@ -54,7 +57,7 @@ func (connection *Connection) CreateRole(name, description string) (Role, error)
 		"composite":   false,
 		"clientRole":  false,
 	}
-	result, err := connection.Post("/admin", "/roles", payload)
+	result, err := connection.Post("/admin", "/roles", curl.BodyJSON(payload))
 	if err != nil {
 		return role, err
 	}
@@ -75,7 +78,7 @@ func (connection *Connection) UpdateRole(roleID, description string) (Role, erro
 	payload := map[string]interface{}{
 		"description": description,
 	}
-	result, err := connection.Put("/admin", "/roles-by-id/"+roleID, payload)
+	result, err := connection.Post("/admin", "/roles-by-id/"+roleID, curl.BodyJSON(payload))
 	if err != nil {
 		return role, err
 	}

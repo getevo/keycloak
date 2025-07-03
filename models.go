@@ -58,6 +58,9 @@ func (connection *Connection) PrepareRequest(data []interface{}) []interface{} {
 				headers["Authorization"] = "Bearer " + connection.Admin.AccessToken
 			}
 		}
+		if v, ok := data[idx].(map[string]interface{}); ok {
+			data = append(data, curl.BodyJSON(v))
+		}
 	}
 	if !hasHeader {
 		data = append(data, curl.Header{"Authorization": "Bearer " + connection.Admin.AccessToken})

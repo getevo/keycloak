@@ -1,6 +1,9 @@
 package keycloak
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/getevo/evo/v2/lib/curl"
+)
 
 type Group struct {
 	ID            string        `json:"id"`
@@ -53,7 +56,7 @@ func GetGroup(id string) (*Group, error) {
 }
 
 func (connection *Connection) CreateGroup(group *Group) error {
-	result, err := connection.Post("/admin", "/groups", group)
+	result, err := connection.Post("/admin", "/groups", curl.BodyJSON(group))
 	if err != nil {
 		return err
 	}
@@ -75,7 +78,7 @@ func CreateGroup(group *Group) error {
 }
 
 func (connection *Connection) UpdateGroup(group *Group) error {
-	result, err := connection.Put("/admin", "/groups/"+group.ID, group)
+	result, err := connection.Put("/admin", "/groups/"+group.ID, curl.BodyJSON(group))
 	if err != nil {
 		return err
 	}

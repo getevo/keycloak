@@ -107,7 +107,18 @@ func (connection *Connection) UpdateGroup(id string, group *Group) error {
 		}
 
 	}
+	err := connection.SetGroupRoles(id, group)
+	if err != nil {
+		return fmt.Errorf("unable to update group roles: %w", err)
+	}
+	return nil
+}
 
+func UpdateGroup(id string, group *Group) error {
+	return conn.UpdateGroup(id, group)
+}
+
+func (connection *Connection) SetGroupRoles(id string, group *Group) error {
 	roles, err := connection.GetRoles()
 	if err != nil {
 		return fmt.Errorf("unable to retrieve roles: %w", err)
@@ -138,8 +149,8 @@ func (connection *Connection) UpdateGroup(id string, group *Group) error {
 	return nil
 }
 
-func UpdateGroup(id string, group *Group) error {
-	return conn.UpdateGroup(id, group)
+func SetGroupRoles(id string, group *Group) error {
+	return conn.SetGroupRoles(id, group)
 }
 
 func (connection *Connection) DeleteGroup(id string) error {
@@ -149,4 +160,99 @@ func (connection *Connection) DeleteGroup(id string) error {
 
 func DeleteGroup(id string) error {
 	return conn.DeleteGroup(id)
+}
+
+func (connection *Connection) SetUserGroups(uuid string, groups []string) error {
+	// 1- get user groups
+	userGroups, err := connection.GetUserGroups(uuid)
+	if err != nil {
+		return fmt.Errorf("failed to get user groups: %w", err)
+	}
+
+	// 2- join to new groups
+	for _, groupID := range groups {
+		var found = false
+		for _, item := range userGroups {
+			if item.ID == groupID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			err := connection.UserJoinGroup(uuid, groupID)
+			if err != nil {
+				return fmt.Errorf("failed to join group %s: %w", groupID, err)
+			}
+		}
+	}
+
+	// 3- remove from removed groups
+	for _, item := range userGroups {
+		var found = false
+		for _, groupID := range groups {
+			if item.ID == groupID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			err := connection.UserLeaveGroup(uuid, item.ID)
+			if err != nil {
+				return fmt.Errorf("failed to leave group %s: %w", item.ID, err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func SetUserGroups(uuid string, groups []string) error {
+	return conn.SetUserGroups(uuid, groups)
+}
+
+func (connection *Connection) GetUserGroups(uuid string) ([]Group, error) {
+	result, err := connection.Get("/admin", "/users/"+uuid+"/groups?first=0&max=99999")
+	if err != nil {
+		return nil, err
+	}
+	var groups []Group
+	err = result.ToJSON(&groups)
+	if err != nil {
+		return nil, err
+	}
+	return groups, nil
+}
+
+func GetUserGroups(uuid string) ([]Group, error) {
+	return conn.GetUserGroups(uuid)
+}
+
+func (connection *Connection) UserJoinGroup(uuid, groupID string) error {
+	result, err := connection.Put("/admin", "/users/"+uuid+"/groups/"+groupID, nil)
+	if err != nil {
+		return err
+	}
+	if result.Response().StatusCode != 204 {
+		return fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
+	}
+	return nil
+}
+
+func UserJoinGroup(uuid, groupID string) error {
+	return conn.UserJoinGroup(uuid, groupID)
+}
+
+func (connection *Connection) UserLeaveGroup(uuid, groupID string) error {
+	result, err := connection.Delete("/admin", "/users/"+uuid+"/groups/"+groupID, nil)
+	if err != nil {
+		return err
+	}
+	if result.Response().StatusCode != 204 {
+		return fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
+	}
+	return nil
+}
+
+func UserLeaveGroup(uuid, groupID string) error {
+	return conn.UserLeaveGroup(uuid, groupID)
 }

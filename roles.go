@@ -1,6 +1,9 @@
 package keycloak
 
-import "github.com/getevo/evo/v2/lib/curl"
+import (
+	"fmt"
+	"github.com/getevo/evo/v2/lib/curl"
+)
 
 type Role struct {
 	ID          string `json:"id"`
@@ -76,10 +79,9 @@ func CreateRole(name, description string) (Role, error) {
 	return conn.CreateRole(name, description)
 }
 
-func (connection *Connection) UpdateRole(roleID, name, description string) (Role, error) {
+func (connection *Connection) UpdateRole(roleID, description string) (Role, error) {
 	var role Role
 	payload := map[string]interface{}{
-		"name":        name,
 		"description": description,
 	}
 	result, err := connection.Put("/admin", "/roles-by-id/"+roleID, payload, curl.Header{
@@ -88,7 +90,7 @@ func (connection *Connection) UpdateRole(roleID, name, description string) (Role
 	if err != nil {
 		return role, err
 	}
-
+	fmt.Println(result.Dump())
 	err = result.ToJSON(&role)
 	if err != nil {
 		return role, err
@@ -96,8 +98,8 @@ func (connection *Connection) UpdateRole(roleID, name, description string) (Role
 	return role, nil
 }
 
-func UpdateRole(roleID, name, description string) (Role, error) {
-	return conn.UpdateRole(roleID, name, description)
+func UpdateRole(roleID, description string) (Role, error) {
+	return conn.UpdateRole(roleID, description)
 }
 
 func (connection *Connection) DeleteRole(roleID string) error {

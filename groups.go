@@ -19,6 +19,7 @@ type Group struct {
 		ManageMembership bool `json:"manageMembership"`
 	} `json:"access,omitempty"`
 	RealmRoles []string `json:"realmRoles,omitempty"`
+	Error      *string  `json:"errorMessage,omitempty"`
 }
 
 func (connection *Connection) GetGroups() ([]Group, error) {
@@ -69,6 +70,9 @@ func (connection *Connection) CreateGroup(group *Group) error {
 	fmt.Println(result.Dump())
 	if err != nil {
 		return err
+	}
+	if createdGroup.Error != nil {
+		return fmt.Errorf(*createdGroup.Error)
 	}
 	if createdGroup.ID == "" {
 		return fmt.Errorf("expected group ID, got empty string")

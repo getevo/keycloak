@@ -6,12 +6,13 @@ import (
 )
 
 type Role struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Composite   bool   `json:"composite"`
-	ClientRole  bool   `json:"clientRole"`
-	ContainerID string `json:"containerId"`
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Composite   bool    `json:"composite"`
+	ClientRole  bool    `json:"clientRole"`
+	ContainerID string  `json:"containerId"`
+	Error       *string `json:"errorMessage,omitempty"`
 }
 
 func (connection *Connection) GetRoles() ([]Role, error) {
@@ -65,6 +66,9 @@ func (connection *Connection) CreateRole(name, description string) (Role, error)
 	err = result.ToJSON(&role)
 	if err != nil {
 		return role, err
+	}
+	if role.Error != nil {
+		return role, fmt.Errorf(*role.Error)
 	}
 	return role, nil
 }

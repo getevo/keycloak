@@ -3,6 +3,7 @@ package keycloak
 import (
 	"fmt"
 	"github.com/getevo/evo/v2/lib/curl"
+	"github.com/tidwall/gjson"
 )
 
 type Role struct {
@@ -93,7 +94,7 @@ func (connection *Connection) UpdateRole(roleID, name, description string) (Role
 		return role, err
 	}
 	if result.Response().StatusCode != 204 {
-		return role, fmt.Errorf(result.String())
+		return role, fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
 	}
 	return role, nil
 }

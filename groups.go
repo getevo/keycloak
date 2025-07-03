@@ -3,6 +3,7 @@ package keycloak
 import (
 	"fmt"
 	"github.com/getevo/evo/v2/lib/curl"
+	"github.com/tidwall/gjson"
 )
 
 type Group struct {
@@ -97,9 +98,12 @@ func (connection *Connection) UpdateGroup(id string, group *Group) error {
 			"name": group.Name,
 		}
 		result, err := connection.Put("/admin", "/groups/"+group.ID, curl.BodyJSON(payload))
-		fmt.Println(result.Dump())
-		if err == nil {
-			return fmt.Errorf("group with name %s already exists", group.Name)
+		if err != nil {
+			return fmt.Errorf("unable to update group name: %w", err)
+		}
+
+		if result.Response().StatusCode != 204 {
+			return fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
 		}
 
 	}

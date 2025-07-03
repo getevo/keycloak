@@ -1,10 +1,5 @@
 package keycloak
 
-import (
-	"fmt"
-	"github.com/getevo/evo/v2/lib/curl"
-)
-
 type Role struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`

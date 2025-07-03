@@ -2,6 +2,7 @@ package keycloak
 
 import (
 	"fmt"
+	"github.com/getevo/evo/v2"
 	"github.com/getevo/evo/v2/lib/curl"
 )
 
@@ -81,14 +82,11 @@ func (connection *Connection) UpdateRole(roleID, name, description string) (Role
 		return role, err
 	}
 
-	var payload = map[string]interface{}{
-		"name":        name,
-		"description": description,
-		"composite":   role.Composite,
-		"clientRole":  role.ClientRole,
-		"id":          roleID,
-	}
-	result, err := connection.Put("/admin", "/roles-by-id/"+roleID, curl.BodyJSON(payload))
+	role.Name = name
+	role.Description = description
+	evo.Dump(role)
+	result, err := connection.Put("/admin", "/roles-by-id/"+roleID, curl.BodyJSON(role))
+	fmt.Println(result.Dump())
 	if err != nil {
 		return role, err
 	}

@@ -75,11 +75,14 @@ func CreateRole(name, description string) (Role, error) {
 
 func (connection *Connection) UpdateRole(roleID, name, description string) (Role, error) {
 	var role Role
-	payload := map[string]interface{}{
-		"name":        name,
-		"description": description,
+	getRole, err := connection.GetRole(roleID)
+	if err != nil {
+		return role, err
 	}
-	result, err := connection.Put("/admin", "/roles-by-id/"+roleID, curl.BodyJSON(payload))
+
+	getRole.Name = name
+	getRole.Description = description
+	result, err := connection.Put("/admin", "/roles-by-id/"+roleID, curl.BodyJSON(getRole))
 	if err != nil {
 		return role, err
 	}

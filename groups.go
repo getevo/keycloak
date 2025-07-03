@@ -108,12 +108,19 @@ func (connection *Connection) UpdateGroup(id string, group *Group) error {
 
 	}
 
+	roles, err := connection.GetRoles()
+	if err != nil {
+		return fmt.Errorf("unable to retrieve roles: %w", err)
+	}
 	// update the group roles
-	var payload = []map[string]interface{}{}
+	var payload []Role
 	for _, role := range group.RealmRoles {
-		payload = append(payload, map[string]interface{}{
-			"id": role,
-		})
+		for idx, roleMapping := range roles {
+			if roleMapping.Name == role || roleMapping.ID == role {
+				payload = append(payload, roles[idx])
+				break
+			}
+		}
 	}
 
 	result, err := connection.Post("/admin", "/groups/"+group.ID+"/role-mappings/realm", curl.BodyJSON(payload))

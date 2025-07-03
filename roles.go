@@ -78,7 +78,7 @@ func (connection *Connection) UpdateRole(roleID, description string) (Role, erro
 	payload := map[string]interface{}{
 		"description": description,
 	}
-	result, err := connection.Post("/admin", "/roles-by-id/"+roleID, curl.BodyJSON(payload))
+	result, err := connection.Put("/admin", "/roles-by-id/"+roleID, curl.BodyJSON(payload))
 	if err != nil {
 		return role, err
 	}

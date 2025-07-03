@@ -115,20 +115,26 @@ func (connection *Connection) UpdateGroup(id string, group *Group) error {
 	// update the group roles
 	var payload []Role
 	for _, role := range group.RealmRoles {
+		var found = false
 		for idx, roleMapping := range roles {
 			if roleMapping.Name == role || roleMapping.ID == role {
 				payload = append(payload, roles[idx])
+				found = true
 				break
 			}
+		}
+		if !found {
+			return fmt.Errorf("role %s not found", role)
 		}
 	}
 
 	result, err := connection.Post("/admin", "/groups/"+group.ID+"/role-mappings/realm", curl.BodyJSON(payload))
-	fmt.Println(result.Dump())
 	if err != nil {
 		return err
 	}
-
+	if result.Response().StatusCode != 204 {
+		return fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
+	}
 	return nil
 }
 

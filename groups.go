@@ -57,8 +57,10 @@ func GetGroup(id string) (*Group, error) {
 
 func (connection *Connection) CreateGroup(group *Group) error {
 	//var roles = group.RealmRoles
-	group.RealmRoles = nil
-	result, err := connection.Post("/admin", "/groups", curl.BodyJSON(group))
+	var payload = map[string]interface{}{
+		"name": group.Name,
+	}
+	result, err := connection.Post("/admin", "/groups", curl.BodyJSON(payload))
 	fmt.Println(result.Dump())
 	if err != nil {
 		return err

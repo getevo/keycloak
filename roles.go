@@ -1,6 +1,9 @@
 package keycloak
 
-import "github.com/getevo/evo/v2/lib/curl"
+import (
+	"fmt"
+	"github.com/getevo/evo/v2/lib/curl"
+)
 
 type Role struct {
 	ID          string `json:"id"`
@@ -12,9 +15,7 @@ type Role struct {
 }
 
 func (connection *Connection) GetRoles() ([]Role, error) {
-	result, err := connection.Get("/admin", "/roles?first=0&max=9999", curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	})
+	result, err := connection.Get("/admin", "/roles?first=0&max=9999")
 	if err != nil {
 		return nil, err
 	}
@@ -72,13 +73,12 @@ func CreateRole(name, description string) (Role, error) {
 	return conn.CreateRole(name, description)
 }
 
-func (connection *Connection) UpdateRole(roleID, name, description string) (Role, error) {
+func (connection *Connection) UpdateRole(roleID, description string) (Role, error) {
 	var role Role
 	payload := map[string]interface{}{
-		"name":        name,
 		"description": description,
 	}
-	result, err := connection.Post("/admin", "/roles-by-id/"+roleID, payload)
+	result, err := connection.Put("/admin", "/roles-by-id/"+roleID, payload)
 	if err != nil {
 		return role, err
 	}
@@ -90,8 +90,8 @@ func (connection *Connection) UpdateRole(roleID, name, description string) (Role
 	return role, nil
 }
 
-func UpdateRole(roleID, name, description string) (Role, error) {
-	return conn.UpdateRole(roleID, name, description)
+func UpdateRole(roleID, description string) (Role, error) {
+	return conn.UpdateRole(roleID, description)
 }
 
 func (connection *Connection) DeleteRole(roleID string) error {

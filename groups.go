@@ -112,7 +112,7 @@ func (connection *Connection) UpdateGroup(id string, group *Group) error {
 	var payload = []map[string]interface{}{}
 	for _, role := range group.RealmRoles {
 		payload = append(payload, map[string]interface{}{
-			"name": role,
+			"id": role,
 		})
 	}
 

@@ -15,9 +15,7 @@ type Role struct {
 }
 
 func (connection *Connection) GetRoles() ([]Role, error) {
-	result, err := connection.Get("/admin", "/roles?first=0&max=9999", curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	})
+	result, err := connection.Get("/admin", "/roles?first=0&max=9999")
 	if err != nil {
 		return nil, err
 	}
@@ -35,9 +33,7 @@ func GetRoles() ([]Role, error) {
 
 func (connection *Connection) GetRole(id string) (Role, error) {
 	var role Role
-	result, err := connection.Get("/admin", "/roles-by-id/"+id, curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	})
+	result, err := connection.Get("/admin", "/roles-by-id/"+id)
 	if err != nil {
 		return role, err
 	}
@@ -61,9 +57,7 @@ func (connection *Connection) CreateRole(name, description string) (Role, error)
 		"composite":   false,
 		"clientRole":  false,
 	}
-	result, err := connection.Post("/admin", "/roles", payload, curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	})
+	result, err := connection.Post("/admin", "/roles", payload)
 	if err != nil {
 		return role, err
 	}
@@ -84,9 +78,7 @@ func (connection *Connection) UpdateRole(roleID, description string) (Role, erro
 	payload := map[string]interface{}{
 		"description": description,
 	}
-	result, err := connection.Put("/admin", "/roles-by-id/"+roleID, payload, curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	})
+	result, err := connection.Put("/admin", "/roles-by-id/"+roleID, payload)
 	if err != nil {
 		return role, err
 	}

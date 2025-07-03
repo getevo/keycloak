@@ -32,9 +32,7 @@ func GetRoles() ([]Role, error) {
 
 func (connection *Connection) GetRole(id string) (Role, error) {
 	var role Role
-	result, err := connection.Get("/admin", "/roles-by-id/"+id, curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	})
+	result, err := connection.Get("/admin", "/roles-by-id/"+id)
 	if err != nil {
 		return role, err
 	}
@@ -58,9 +56,7 @@ func (connection *Connection) CreateRole(name, description string) (Role, error)
 		"composite":   false,
 		"clientRole":  false,
 	}
-	result, err := connection.Post("/admin", "/roles", payload, curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	})
+	result, err := connection.Post("/admin", "/roles", payload)
 	if err != nil {
 		return role, err
 	}
@@ -82,9 +78,7 @@ func (connection *Connection) UpdateRole(roleID, name, description string) (Role
 		"name":        name,
 		"description": description,
 	}
-	result, err := connection.Put("/admin", "/roles-by-id/"+roleID, payload, curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	})
+	result, err := connection.Post("/admin", "/roles-by-id/"+roleID, payload)
 	if err != nil {
 		return role, err
 	}
@@ -101,9 +95,7 @@ func UpdateRole(roleID, name, description string) (Role, error) {
 }
 
 func (connection *Connection) DeleteRole(roleID string) error {
-	_, err := connection.Delete("/admin", "/roles-by-id/"+roleID, curl.Header{
-		"Authorization": "Bearer " + connection.Admin.AccessToken,
-	})
+	_, err := connection.Delete("/admin", "/roles-by-id/"+roleID)
 	return err
 }
 

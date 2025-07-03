@@ -1,5 +1,7 @@
 package keycloak
 
+import "fmt"
+
 type Role struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
@@ -82,6 +84,7 @@ func (connection *Connection) UpdateRole(roleID, description string) (Role, erro
 	if err != nil {
 		return role, err
 	}
+	fmt.Println(result.Dump())
 	return role, nil
 }
 

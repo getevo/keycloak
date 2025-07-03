@@ -61,7 +61,6 @@ func (connection *Connection) CreateGroup(group *Group) error {
 		"name": group.Name,
 	}
 	result, err := connection.Post("/admin", "/groups", curl.BodyJSON(payload))
-	fmt.Println(result.Dump())
 	if err != nil {
 		return err
 	}
@@ -73,6 +72,10 @@ func (connection *Connection) CreateGroup(group *Group) error {
 	if createdGroup.ID == "" {
 		return fmt.Errorf("expected group ID, got empty string")
 	}
+	err = connection.UpdateGroup(group.ID, group)
+	if err != nil {
+		return err
+	}
 	group.ID = createdGroup.ID
 	group.Path = createdGroup.Path
 	return nil
@@ -82,26 +85,40 @@ func CreateGroup(group *Group) error {
 	return conn.CreateGroup(group)
 }
 
-func (connection *Connection) UpdateGroup(group *Group) error {
-	result, err := connection.Put("/admin", "/groups/"+group.ID, curl.BodyJSON(group))
+func (connection *Connection) UpdateGroup(id string, group *Group) error {
+	group.ID = id
+	// rename the group if necessary
+	if group.Name != "" {
+		var payload = map[string]interface{}{
+			"name": group.Name,
+		}
+		result, err := connection.Put("/admin", "/groups/"+group.ID, curl.BodyJSON(payload))
+		fmt.Println(result.Dump())
+		if err == nil {
+			return fmt.Errorf("group with name %s already exists", group.Name)
+		}
+
+	}
+
+	// update the group roles
+	var payload = []map[string]interface{}{}
+	for _, role := range group.RealmRoles {
+		payload = append(payload, map[string]interface{}{
+			"name": role,
+		})
+	}
+
+	result, err := connection.Put("/admin", "/groups/"+group.ID+"/role-mappings/realm", curl.BodyJSON(payload))
 	if err != nil {
 		return err
 	}
-	var updatedGroup Group
-	err = result.ToJSON(&updatedGroup)
-	if err != nil {
-		return err
-	}
-	if updatedGroup.ID != group.ID {
-		return fmt.Errorf("expected group ID %s, got %s", group.ID, updatedGroup.ID)
-	}
-	group.ID = updatedGroup.ID
-	group.Path = updatedGroup.Path
+	fmt.Println(result.Dump())
+
 	return nil
 }
 
-func UpdateGroup(group *Group) error {
-	return conn.UpdateGroup(group)
+func UpdateGroup(id string, group *Group) error {
+	return conn.UpdateGroup(id, group)
 }
 
 func (connection *Connection) DeleteGroup(id string) error {

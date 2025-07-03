@@ -109,10 +109,10 @@ func (connection *Connection) UpdateGroup(id string, group *Group) error {
 	}
 
 	result, err := connection.Put("/admin", "/groups/"+group.ID+"/role-mappings/realm", curl.BodyJSON(payload))
+	fmt.Println(result.Dump())
 	if err != nil {
 		return err
 	}
-	fmt.Println(result.Dump())
 
 	return nil
 }

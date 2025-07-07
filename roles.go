@@ -53,6 +53,9 @@ func GetRole(id string) (Role, error) {
 
 func (connection *Connection) CreateRole(name, description string) (Role, error) {
 	var role Role
+	if name == "" {
+		return role, fmt.Errorf("name is required")
+	}
 	payload := map[string]interface{}{
 		"name":        name,
 		"description": description,
@@ -81,6 +84,9 @@ func CreateRole(name, description string) (Role, error) {
 func (connection *Connection) UpdateRole(roleID, name, description string) (Role, error) {
 	var role Role
 	var err error
+	if name == "" {
+		return role, fmt.Errorf("name is required")
+	}
 	role, err = connection.GetRole(roleID)
 	if err != nil {
 		return role, err

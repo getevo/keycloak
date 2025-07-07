@@ -59,6 +59,9 @@ func GetGroup(id string) (*Group, error) {
 
 func (connection *Connection) CreateGroup(group *Group) error {
 	//var roles = group.RealmRoles
+	if group.Name == "" {
+		return fmt.Errorf("expected non-empty group name")
+	}
 	var payload = map[string]interface{}{
 		"name": group.Name,
 	}

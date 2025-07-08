@@ -297,7 +297,6 @@ func (connection *Connection) EditUser(user *UserInstance) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(result.Dump())
 	var parsed = gjson.Parse(result.String())
 	if parsed.Get("error").String() != "" {
 		return fmt.Errorf(parsed.Get("error").String())

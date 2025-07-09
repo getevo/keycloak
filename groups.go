@@ -3,6 +3,7 @@ package keycloak
 import (
 	"fmt"
 	"github.com/getevo/evo/v2/lib/curl"
+	"github.com/getevo/evo/v2/lib/text"
 	"github.com/tidwall/gjson"
 )
 
@@ -63,7 +64,7 @@ func (connection *Connection) CreateGroup(group *Group) error {
 		return fmt.Errorf("expected non-empty group name")
 	}
 	var payload = map[string]interface{}{
-		"name": group.Name,
+		"name": text.Slugify(group.Name),
 	}
 	result, err := connection.Post("/admin", "/groups", curl.BodyJSON(payload))
 	if err != nil {
@@ -98,7 +99,7 @@ func (connection *Connection) UpdateGroup(id string, group *Group) error {
 	// rename the group if necessary
 	if group.Name != "" {
 		var payload = map[string]interface{}{
-			"name": group.Name,
+			"name": text.Slugify(group.Name),
 		}
 		result, err := connection.Put("/admin", "/groups/"+group.ID, curl.BodyJSON(payload))
 		if err != nil {

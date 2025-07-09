@@ -3,6 +3,7 @@ package keycloak
 import (
 	"fmt"
 	"github.com/getevo/evo/v2/lib/curl"
+	"github.com/getevo/evo/v2/lib/text"
 	"github.com/tidwall/gjson"
 )
 
@@ -57,7 +58,7 @@ func (connection *Connection) CreateRole(name, description string) (Role, error)
 		return role, fmt.Errorf("name is required")
 	}
 	payload := map[string]interface{}{
-		"name":        name,
+		"name":        text.Slugify(name),
 		"description": description,
 		"composite":   false,
 		"clientRole":  false,
@@ -92,7 +93,7 @@ func (connection *Connection) UpdateRole(roleID, name, description string) (Role
 		return role, err
 	}
 
-	role.Name = name
+	role.Name = text.Slugify(name)
 	role.Description = description
 	result, err := connection.Put("/admin", "/roles-by-id/"+roleID, curl.BodyJSON(role))
 

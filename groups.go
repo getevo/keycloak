@@ -168,13 +168,23 @@ func (connection *Connection) SetGroupRoles(id string, group *Group) error {
 			}
 		}
 		if !found {
-			result, err := connection.Delete("/admin", "/groups/"+getGroup.ID+"/role-mappings/realm/"+r1)
-			if err != nil {
-				return err
+			var payload []Role
+			for _, role := range roles {
+				if role.Name == r1 || role.ID == r1 {
+					payload = append(payload, role)
+
+					result, err := connection.Delete("/admin", "/groups/"+getGroup.ID+"/role-mappings/realm", curl.BodyJSON(payload))
+					if err != nil {
+						return err
+					}
+					if result.Response().StatusCode != 204 {
+						return fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
+					}
+
+					break
+				}
 			}
-			if result.Response().StatusCode != 204 {
-				return fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
-			}
+
 		}
 	}
 

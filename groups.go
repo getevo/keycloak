@@ -168,7 +168,7 @@ func (connection *Connection) SetGroupRoles(id string, group *Group) error {
 			}
 		}
 		if !found {
-			result, err := connection.Delete("/admin", "/groups/"+group.ID+"/role-mappings/realm/"+role)
+			result, err := connection.Delete("/admin", "/groups/"+getGroup.ID+"/role-mappings/realm/"+r1)
 			if err != nil {
 				return err
 			}

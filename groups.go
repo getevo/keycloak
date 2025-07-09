@@ -150,6 +150,34 @@ func (connection *Connection) SetGroupRoles(id string, group *Group) error {
 	if result.Response().StatusCode != 204 {
 		return fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
 	}
+
+	getGroup, err := connection.GetGroup(group.ID)
+	if err != nil {
+		return err
+	}
+	if result.Response().StatusCode != 204 {
+		return fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
+	}
+
+	for _, r1 := range getGroup.RealmRoles {
+		var found = false
+		for _, r2 := range group.RealmRoles {
+			if r1 != r2 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			result, err := connection.Delete("/admin", "/groups/"+group.ID+"/role-mappings/realm/"+role)
+			if err != nil {
+				return err
+			}
+			if result.Response().StatusCode != 204 {
+				return fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
+			}
+		}
+	}
+
 	return nil
 }
 

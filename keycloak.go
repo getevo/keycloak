@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (connection *Connection) EditUserFromStruct(user interface{}) error {
+func (connection *Connection) EditUserFromStruct(user interface{}, extraAttributes map[string]interface{}) error {
 	var _typ = reflect.TypeOf(user)
 	if _typ.Kind() != reflect.Ptr {
 		return fmt.Errorf("user must be a pointer")
@@ -31,7 +31,11 @@ func (connection *Connection) EditUserFromStruct(user interface{}) error {
 	if err != nil {
 		return err
 	}
-
+	if extraAttributes != nil {
+		for k, v := range extraAttributes {
+			keycloakUser.Attributes.Set(k, sprint(reflect.ValueOf(v)))
+		}
+	}
 	if keycloakUser.Credentials != nil && len(*keycloakUser.Credentials) > 0 && (*keycloakUser.Credentials)[0].Value != "" {
 		err = connection.ChangePassword(&keycloakUser, (*keycloakUser.Credentials)[0].Value)
 		if err != nil {
@@ -193,8 +197,8 @@ func NewUser(user interface{}) error {
 	return conn.NewUserFromStruct(user)
 }
 
-func EditUser(user interface{}) error {
-	return conn.EditUserFromStruct(user)
+func EditUser(user interface{}, extraAttributes map[string]interface{}) error {
+	return conn.EditUserFromStruct(user, extraAttributes)
 }
 
 func DeleteUser(uuid string) error {

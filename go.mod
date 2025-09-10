@@ -1,4 +1,4 @@
-module keycloak
+module github.com/getevo/keycloak
 
 go 1.23.5
 

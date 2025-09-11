@@ -162,7 +162,7 @@ func (connection *Connection) SetGroupRoles(id string, group *Group) error {
 	for _, r1 := range getGroup.RealmRoles {
 		var found = false
 		for _, r2 := range group.RealmRoles {
-			if r1 != r2 {
+			if r1 == r2 {
 				found = true
 				break
 			}

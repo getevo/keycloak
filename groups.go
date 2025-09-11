@@ -148,13 +148,21 @@ func (connection *Connection) SetGroupRoles(id string, group *Group) error {
 	desiredRoleIDs := make(map[string]bool)
 	for _, roleIdentifier := range group.RealmRoles {
 		// Try to find role by name first, then by ID
-		role, nameExists := roleByName[roleIdentifier]
-		if !nameExists {
-			role, idExists := roleByID[roleIdentifier]
-			if !idExists {
-				return fmt.Errorf("role %s not found", roleIdentifier)
-			}
+		var role Role
+		var found bool
+
+		if r, exists := roleByName[roleIdentifier]; exists {
+			role = r
+			found = true
+		} else if r, exists := roleByID[roleIdentifier]; exists {
+			role = r
+			found = true
 		}
+
+		if !found {
+			return fmt.Errorf("role %s not found", roleIdentifier)
+		}
+
 		desiredRoles = append(desiredRoles, role)
 		// Use role ID for comparison to ensure consistency
 		desiredRoleIDs[role.ID] = true

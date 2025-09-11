@@ -123,68 +123,80 @@ func UpdateGroup(id string, group *Group) error {
 }
 
 func (connection *Connection) SetGroupRoles(id string, group *Group) error {
-	roles, err := connection.GetRoles()
+	// Get all available roles
+	allRoles, err := connection.GetRoles()
 	if err != nil {
 		return fmt.Errorf("unable to retrieve roles: %w", err)
 	}
-	// update the group roles
-	var payload []Role
-	for _, role := range group.RealmRoles {
-		var found = false
-		for idx, roleMapping := range roles {
-			if roleMapping.Name == role || roleMapping.ID == role {
-				payload = append(payload, roles[idx])
-				found = true
-				break
-			}
-		}
-		if !found {
-			return fmt.Errorf("role %s not found", role)
-		}
-	}
 
-	result, err := connection.Post("/admin", "/groups/"+group.ID+"/role-mappings/realm", curl.BodyJSON(payload))
+	// Get current group to see existing roles
+	currentGroup, err := connection.GetGroup(id)
 	if err != nil {
-		return err
-	}
-	if result.Response().StatusCode != 204 {
-		return fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
+		return fmt.Errorf("unable to get current group: %w", err)
 	}
 
-	getGroup, err := connection.GetGroup(group.ID)
-	if err != nil {
-		return err
-	}
-	if result.Response().StatusCode != 204 {
-		return fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
+	// Create maps for easier lookup
+	roleMap := make(map[string]Role)
+	for _, role := range allRoles {
+		roleMap[role.Name] = role
+		roleMap[role.ID] = role
 	}
 
-	for _, r1 := range getGroup.RealmRoles {
-		var found = false
-		for _, r2 := range group.RealmRoles {
-			if r1 == r2 {
-				found = true
-				break
+	// Build list of desired roles, validating they exist
+	var desiredRoles []Role
+	desiredRoleNames := make(map[string]bool)
+	for _, roleName := range group.RealmRoles {
+		role, exists := roleMap[roleName]
+		if !exists {
+			return fmt.Errorf("role %s not found", roleName)
+		}
+		desiredRoles = append(desiredRoles, role)
+		desiredRoleNames[role.Name] = true
+	}
+
+	// Build list of current roles
+	currentRoleNames := make(map[string]bool)
+	for _, roleName := range currentGroup.RealmRoles {
+		currentRoleNames[roleName] = true
+	}
+
+	// Determine roles to add (in desired but not in current)
+	var rolesToAdd []Role
+	for _, role := range desiredRoles {
+		if !currentRoleNames[role.Name] {
+			rolesToAdd = append(rolesToAdd, role)
+		}
+	}
+
+	// Determine roles to remove (in current but not in desired)
+	var rolesToRemove []Role
+	for _, roleName := range currentGroup.RealmRoles {
+		if !desiredRoleNames[roleName] {
+			if role, exists := roleMap[roleName]; exists {
+				rolesToRemove = append(rolesToRemove, role)
 			}
 		}
-		if !found {
-			var payload []Role
-			for _, role := range roles {
-				if role.Name == r1 || role.ID == r1 {
-					payload = append(payload, role)
+	}
 
-					result, err := connection.Delete("/admin", "/groups/"+getGroup.ID+"/role-mappings/realm", curl.BodyJSON(payload))
-					if err != nil {
-						return err
-					}
-					if result.Response().StatusCode != 204 {
-						return fmt.Errorf(gjson.Parse(result.String()).Get("errorMessage").String())
-					}
+	// Add new roles
+	if len(rolesToAdd) > 0 {
+		result, err := connection.Post("/admin", "/groups/"+id+"/role-mappings/realm", curl.BodyJSON(rolesToAdd))
+		if err != nil {
+			return fmt.Errorf("unable to add roles: %w", err)
+		}
+		if result.Response().StatusCode != 204 {
+			return fmt.Errorf("failed to add roles: %s", gjson.Parse(result.String()).Get("errorMessage").String())
+		}
+	}
 
-					break
-				}
-			}
-
+	// Remove old roles
+	if len(rolesToRemove) > 0 {
+		result, err := connection.Delete("/admin", "/groups/"+id+"/role-mappings/realm", curl.BodyJSON(rolesToRemove))
+		if err != nil {
+			return fmt.Errorf("unable to remove roles: %w", err)
+		}
+		if result.Response().StatusCode != 204 {
+			return fmt.Errorf("failed to remove roles: %s", gjson.Parse(result.String()).Get("errorMessage").String())
 		}
 	}
 

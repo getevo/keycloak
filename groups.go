@@ -135,44 +135,56 @@ func (connection *Connection) SetGroupRoles(id string, group *Group) error {
 		return fmt.Errorf("unable to get current group: %w", err)
 	}
 
-	// Create maps for easier lookup
-	roleMap := make(map[string]Role)
+	// Create separate maps for ID and Name lookups to avoid conflicts
+	roleByID := make(map[string]Role)
+	roleByName := make(map[string]Role)
 	for _, role := range allRoles {
-		roleMap[role.Name] = role
-		roleMap[role.ID] = role
+		roleByID[role.ID] = role
+		roleByName[role.Name] = role
 	}
 
 	// Build list of desired roles, validating they exist
 	var desiredRoles []Role
-	desiredRoleNames := make(map[string]bool)
-	for _, roleName := range group.RealmRoles {
-		role, exists := roleMap[roleName]
-		if !exists {
-			return fmt.Errorf("role %s not found", roleName)
+	desiredRoleIDs := make(map[string]bool)
+	for _, roleIdentifier := range group.RealmRoles {
+		// Try to find role by name first, then by ID
+		role, nameExists := roleByName[roleIdentifier]
+		if !nameExists {
+			role, idExists := roleByID[roleIdentifier]
+			if !idExists {
+				return fmt.Errorf("role %s not found", roleIdentifier)
+			}
 		}
 		desiredRoles = append(desiredRoles, role)
-		desiredRoleNames[role.Name] = true
+		// Use role ID for comparison to ensure consistency
+		desiredRoleIDs[role.ID] = true
 	}
 
-	// Build list of current roles
-	currentRoleNames := make(map[string]bool)
+	// Map current roles to their IDs for comparison
+	currentRoleIDs := make(map[string]bool)
 	for _, roleName := range currentGroup.RealmRoles {
-		currentRoleNames[roleName] = true
+		// Current roles come as names, need to map to IDs
+		if role, exists := roleByName[roleName]; exists {
+			currentRoleIDs[role.ID] = true
+		} else if role, exists := roleByID[roleName]; exists {
+			// Sometimes Keycloak might return IDs instead of names
+			currentRoleIDs[role.ID] = true
+		}
 	}
 
 	// Determine roles to add (in desired but not in current)
 	var rolesToAdd []Role
 	for _, role := range desiredRoles {
-		if !currentRoleNames[role.Name] {
+		if !currentRoleIDs[role.ID] {
 			rolesToAdd = append(rolesToAdd, role)
 		}
 	}
 
 	// Determine roles to remove (in current but not in desired)
 	var rolesToRemove []Role
-	for _, roleName := range currentGroup.RealmRoles {
-		if !desiredRoleNames[roleName] {
-			if role, exists := roleMap[roleName]; exists {
+	for roleID := range currentRoleIDs {
+		if !desiredRoleIDs[roleID] {
+			if role, exists := roleByID[roleID]; exists {
 				rolesToRemove = append(rolesToRemove, role)
 			}
 		}
@@ -185,7 +197,9 @@ func (connection *Connection) SetGroupRoles(id string, group *Group) error {
 			return fmt.Errorf("unable to add roles: %w", err)
 		}
 		if result.Response().StatusCode != 204 {
-			return fmt.Errorf("failed to add roles: %s", gjson.Parse(result.String()).Get("errorMessage").String())
+			return fmt.Errorf("failed to add roles (status %d): %s",
+				result.Response().StatusCode,
+				gjson.Parse(result.String()).Get("errorMessage").String())
 		}
 	}
 
@@ -196,7 +210,9 @@ func (connection *Connection) SetGroupRoles(id string, group *Group) error {
 			return fmt.Errorf("unable to remove roles: %w", err)
 		}
 		if result.Response().StatusCode != 204 {
-			return fmt.Errorf("failed to remove roles: %s", gjson.Parse(result.String()).Get("errorMessage").String())
+			return fmt.Errorf("failed to remove roles (status %d): %s",
+				result.Response().StatusCode,
+				gjson.Parse(result.String()).Get("errorMessage").String())
 		}
 	}
 

@@ -61,7 +61,7 @@ func (connection *Connection) Post(endpoint string, query string, data ...interf
 	if err != nil {
 		return nil, err
 	}
-	if connection.Settings.Debug {
+	if connection.Settings.Debug || true {
 		fmt.Println(resp.Dump())
 	}
 	resp, err = handleRedirect(resp)

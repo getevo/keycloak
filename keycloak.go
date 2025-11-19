@@ -92,9 +92,7 @@ func setFieldValues(user interface{}, keycloakUser *UserInstance) (error, string
 		var tag = field.Tag.Get("keycloak")
 		if f.IsValid() && field.FieldType == f.Type() && !r.IsZero() {
 			f.Set(reflect.ValueOf(r.Interface()))
-			if len(tag) > 0 {
-				continue
-			}
+
 		}
 
 		var chunks = strings.Split(tag, ":")

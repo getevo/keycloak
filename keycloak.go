@@ -123,7 +123,7 @@ func setFieldValues(user interface{}, keycloakUser *UserInstance) (error, string
 			if f.IsValid() && field.FieldType == f.Type() {
 				if r.IsValid() && !r.IsZero() {
 					f.Set(reflect.ValueOf(r.Interface()))
-					break
+					continue
 				}
 			} else {
 				return fmt.Errorf("field %s not found or type missmatch in user model %s", chunks[1], userRef.Type().String()), uuidField

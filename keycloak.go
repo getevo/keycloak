@@ -134,6 +134,7 @@ func setFieldValues(user interface{}, keycloakUser *UserInstance) (error, string
 		}
 		if chunks[0] == "attribute" {
 			//r = userRef.FieldByName(field.Name)
+			fmt.Println(chunks[1], "=", r.Interface(), ">>", sprint(r))
 			if !r.IsValid() || r.IsZero() || (r.Kind() == reflect.Ptr && r.IsNil()) || r.Interface() == nil {
 				keycloakUser.Attributes.Set(chunks[1], "")
 				continue

@@ -258,7 +258,7 @@ func sprint(v reflect.Value) string {
 		return t.Format(time.RFC3339)
 	case bool:
 		return strconv.FormatBool(t)
-	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64 float32, float64:
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
 		return fmt.Sprint(t)
 	default:
 		switch v.Kind() {

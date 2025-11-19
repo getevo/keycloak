@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"fmt"
-	"github.com/getevo/evo/v2"
 	"github.com/getevo/evo/v2/lib/db/schema"
 	"github.com/getevo/evo/v2/lib/text"
 	"reflect"
@@ -184,7 +183,7 @@ func (connection *Connection) NewUserFromStruct(user interface{}) error {
 	if err != nil {
 		return err
 	}
-	evo.Dump(keycloakUser.Attributes)
+
 	err = connection.CreateUser(keycloakUser)
 	if err != nil {
 		return err

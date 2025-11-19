@@ -243,7 +243,6 @@ func (connection *Connection) CreateUser(user *UserInstance) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(result.Dump())
 	if result.Response().StatusCode == 409 {
 		return fmt.Errorf("duplicate user")
 	}

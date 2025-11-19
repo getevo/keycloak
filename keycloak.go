@@ -5,7 +5,6 @@ import (
 	"github.com/getevo/evo/v2/lib/db/schema"
 	"github.com/getevo/evo/v2/lib/text"
 	"reflect"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -256,7 +255,11 @@ func sprint(v reflect.Value) string {
 		}
 		return t.Format(time.RFC3339)
 	case bool:
-		return strconv.FormatBool(t)
+		if t {
+			return "1"
+		} else {
+			return "0"
+		}
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
 		return fmt.Sprint(t)
 	default:

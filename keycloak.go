@@ -134,9 +134,9 @@ func setFieldValues(user interface{}, keycloakUser *UserInstance) (error, string
 		}
 		if chunks[0] == "attribute" {
 			//r = userRef.FieldByName(field.Name)
-			fmt.Println(chunks[1], "=", r.Interface(), ">>", sprint(r), "invalid?", !r.IsValid() || r.IsZero() || (r.Kind() == reflect.Ptr && r.IsNil()) || r.Interface() == nil)
-			if !r.IsValid() || r.IsZero() || (r.Kind() == reflect.Ptr && r.IsNil()) || r.Interface() == nil {
-				keycloakUser.Attributes.Set(chunks[1], "")
+			fmt.Println(chunks[1], "=", r.Interface(), ">>", sprint(r), "invalid?", !r.IsValid())
+			if !r.IsValid() {
+				keycloakUser.Attributes.Set(chunks[1], "null")
 				continue
 			}
 			keycloakUser.Attributes.Set(chunks[1], sprint(r))
@@ -243,8 +243,8 @@ func VerifyOffline(accessToken string, claims interface{}) (Spec, error) {
 }
 
 func sprint(v reflect.Value) string {
-	if !v.IsValid() || v.IsZero() {
-		return ""
+	if !v.IsValid() || v.Interface() == nil {
+		return "null"
 	}
 	var result string
 	switch t := v.Interface().(type) {

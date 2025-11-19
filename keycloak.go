@@ -6,7 +6,9 @@ import (
 	"github.com/getevo/evo/v2/lib/db/schema"
 	"github.com/getevo/evo/v2/lib/text"
 	"reflect"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func (connection *Connection) EditUserFromStruct(user interface{}, extraAttributes map[string]interface{}) error {
@@ -244,13 +246,30 @@ func sprint(v reflect.Value) string {
 		return ""
 	}
 	var result string
-	switch v.Kind() {
-	case reflect.Struct, reflect.Map, reflect.Slice:
-		result = text.ToJSON(v)
-	case reflect.Ptr:
-		result = sprint(v.Elem())
+	switch t := v.Interface().(type) {
+	case string:
+		return t
+	case time.Time:
+		return t.Format(time.RFC3339)
+	case *time.Time:
+		if t == nil {
+			return ""
+		}
+		return t.Format(time.RFC3339)
+	case bool:
+		return strconv.FormatBool(t)
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64 float32, float64:
+		return fmt.Sprint(t)
 	default:
-		result = fmt.Sprint(v.Interface())
+		switch v.Kind() {
+		case reflect.Struct, reflect.Map, reflect.Slice:
+			result = text.ToJSON(v)
+		case reflect.Ptr:
+			result = sprint(v.Elem())
+		default:
+			result = fmt.Sprint(v.Interface())
+		}
 	}
+
 	return result
 }

@@ -243,7 +243,7 @@ func VerifyOffline(accessToken string, claims interface{}) (Spec, error) {
 
 func sprint(v reflect.Value) string {
 	if !v.IsValid() || v.Interface() == nil {
-		return "null"
+		return ""
 	}
 	var result string
 	switch t := v.Interface().(type) {

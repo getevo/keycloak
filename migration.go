@@ -46,7 +46,7 @@ func MigrateFields(model *schema.Model) {
 			case reflect.Bool:
 				_type = "boolean"
 			case reflect.Struct, reflect.Slice, reflect.Map:
-				_type = "JSON"
+				_type = "String"
 			default:
 				_type = "String"
 			}

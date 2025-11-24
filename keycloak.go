@@ -185,6 +185,11 @@ func (connection *Connection) NewUserFromStruct(user interface{}) error {
 		return err
 	}
 
+	// Set CreatedAt timestamp if not already set
+	if keycloakUser.CreatedAt == 0 {
+		keycloakUser.CreatedAt = time.Now().UnixMilli()
+	}
+
 	err = connection.CreateUser(keycloakUser)
 	if err != nil {
 		return err

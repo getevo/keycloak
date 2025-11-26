@@ -677,3 +677,7 @@ func Connect(s ...Settings) (*Connection, error) {
 	}
 	return &connection, nil
 }
+
+func SetDebug(v bool) {
+	conn.Settings.Debug = v
+}

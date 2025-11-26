@@ -359,6 +359,35 @@ func (connection *Connection) GetUser(id string) (UserInstance, error) {
 	return user, nil
 }
 
+// GetUserRealmRoles retrieves the realm roles assigned to a user.
+// It takes the user UUID as a parameter and returns a slice of role names.
+func (connection *Connection) GetUserRealmRoles(uuid string) ([]string, error) {
+	var roles []Role
+	result, err := connection.Get("admin", "/users/"+uuid+"/role-mappings/realm", curl.Header{
+		"Authorization": "Bearer " + connection.Admin.AccessToken,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if msg := gjson.Parse(result.String()).Get("error").String(); msg != "" {
+		return nil, fmt.Errorf(msg)
+	}
+	err = json.Unmarshal(result.Bytes(), &roles)
+	if err != nil {
+		return nil, err
+	}
+	var roleNames []string
+	for _, role := range roles {
+		roleNames = append(roleNames, role.Name)
+	}
+	return roleNames, nil
+}
+
+// GetUserRealmRoles retrieves the realm roles for a user by UUID using the default connection.
+func GetUserRealmRoles(uuid string) ([]string, error) {
+	return conn.GetUserRealmRoles(uuid)
+}
+
 // GetUserByEmail retrieves a user from the system by their email address.
 // The email address is passed as a string argument.
 // It returns a User struct representing the user found, and an error if any.

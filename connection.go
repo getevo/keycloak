@@ -359,11 +359,11 @@ func (connection *Connection) GetUser(id string) (UserInstance, error) {
 	return user, nil
 }
 
-// GetUserRealmRoles retrieves the realm roles assigned to a user.
+// GetUserRealmRoles retrieves all effective realm roles for a user (including roles from groups and composite roles).
 // It takes the user UUID as a parameter and returns a slice of role names.
 func (connection *Connection) GetUserRealmRoles(uuid string) ([]string, error) {
 	var roles []Role
-	result, err := connection.Get("admin", "/users/"+uuid+"/role-mappings/realm", curl.Header{
+	result, err := connection.Get("admin", "/users/"+uuid+"/role-mappings/realm/composite", curl.Header{
 		"Authorization": "Bearer " + connection.Admin.AccessToken,
 	})
 	if err != nil {

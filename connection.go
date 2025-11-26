@@ -254,10 +254,25 @@ func (connection *Connection) CreateUser(user *UserInstance) error {
 	if result.Response().StatusCode > 299 {
 		return fmt.Errorf("unable to create user")
 	}
-	err = json.Unmarshal(result.Bytes(), &user)
-	if err != nil {
-		return err
+
+	// Extract UUID from Location header since Keycloak returns empty body
+	// Location header format: https://.../admin/realms/{realm}/users/{uuid}
+	location := result.Response().Header.Get("Location")
+	if location != "" {
+		parts := strings.Split(location, "/")
+		if len(parts) > 0 {
+			user.UUID = parts[len(parts)-1]
+		}
 	}
+
+	// If UUID was extracted, fetch the full user details including createdTimestamp
+	if user.UUID != "" {
+		*user, err = connection.GetUser(user.UUID)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

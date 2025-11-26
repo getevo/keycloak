@@ -28,11 +28,19 @@ func (connection *Connection) EditUserFromStruct(user interface{}, extraAttribut
 	if err != nil {
 		return err
 	}
+
+	// Preserve the CreatedAt timestamp before updating fields
+	preservedCreatedAt := keycloakUser.CreatedAt
+
 	err, _ = setFieldValues(user, &keycloakUser)
 
 	if err != nil {
 		return err
 	}
+
+	// Restore CreatedAt after setFieldValues to prevent it from being cleared
+	keycloakUser.CreatedAt = preservedCreatedAt
+
 	if extraAttributes != nil {
 		for k, v := range extraAttributes {
 			keycloakUser.Attributes.Set(k, sprint(reflect.ValueOf(v)))
@@ -183,11 +191,6 @@ func (connection *Connection) NewUserFromStruct(user interface{}) error {
 	err, uuidField = setFieldValues(user, keycloakUser)
 	if err != nil {
 		return err
-	}
-
-	// Set CreatedAt timestamp if not already set
-	if keycloakUser.CreatedAt == 0 {
-		keycloakUser.CreatedAt = time.Now().UnixMilli()
 	}
 
 	err = connection.CreateUser(keycloakUser)

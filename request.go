@@ -64,10 +64,10 @@ func (connection *Connection) Post(endpoint string, query string, data ...interf
 	if connection.Settings.Debug {
 		fmt.Println(resp.Dump())
 	}
-	resp, err = handleRedirect(resp)
+	/*resp, err = handleRedirect(resp)
 	if resp.Response().StatusCode == 204 {
 		return resp, nil
-	}
+	}*/
 	return resp, nil
 }
 

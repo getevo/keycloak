@@ -257,7 +257,7 @@ func (connection *Connection) CreateUser(user *UserInstance) error {
 
 	// Extract UUID from Location header since Keycloak returns empty body
 	// Location header format: https://.../admin/realms/{realm}/users/{uuid}
-	location := result.Response().Header.Get("Location")
+	location := result.Request().URL.RawPath
 	fmt.Println("location header:", location)
 	if location != "" {
 		parts := strings.Split(location, "/")

@@ -258,20 +258,22 @@ func (connection *Connection) CreateUser(user *UserInstance) error {
 	// Extract UUID from Location header since Keycloak returns empty body
 	// Location header format: https://.../admin/realms/{realm}/users/{uuid}
 	location := result.Response().Header.Get("Location")
+	fmt.Println("location header:", location)
 	if location != "" {
 		parts := strings.Split(location, "/")
 		if len(parts) > 0 {
 			user.UUID = parts[len(parts)-1]
 		}
 	}
+	fmt.Println(user.UUID)
 
 	// If UUID was extracted, fetch the full user details including createdTimestamp
-	if user.UUID != "" {
-		*user, err = connection.GetUser(user.UUID)
+	/*	if user.UUID != "" {
+		u, err = connection.GetUser(user.UUID)
 		if err != nil {
 			return err
 		}
-	}
+	}*/
 
 	return nil
 }

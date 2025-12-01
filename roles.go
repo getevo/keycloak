@@ -118,3 +118,25 @@ func (connection *Connection) DeleteRole(roleID string) error {
 func DeleteRole(roleID string) error {
 	return conn.DeleteRole(roleID)
 }
+
+// GetUserRealmRoles retrieves the realm roles assigned to a user.
+func (connection *Connection) GetUserRealmRoles(uuid string) ([]string, error) {
+	result, err := connection.Get("/admin", "/users/"+uuid+"/role-mappings/realm")
+	if err != nil {
+		return nil, err
+	}
+	var roles []Role
+	err = result.ToJSON(&roles)
+	if err != nil {
+		return nil, err
+	}
+	var roleNames []string
+	for _, role := range roles {
+		roleNames = append(roleNames, role.Name)
+	}
+	return roleNames, nil
+}
+
+func GetUserRealmRoles(uuid string) ([]string, error) {
+	return conn.GetUserRealmRoles(uuid)
+}

@@ -188,8 +188,8 @@ func (v Value) Time() (time.Time, error) {
 }
 
 type Reset struct {
-	IDUser    string    `gorm:"column:uuid"`
-	OTP       string    `gorm:"column:otp"`
+	IDUser    string    `gorm:"column:uuid;size:36"`
+	OTP       string    `gorm:"column:otp;size:64"`
 	CreatedAt time.Time `gorm:"column:created_at"`
 	Used      bool      `gorm:"column:used"`
 }

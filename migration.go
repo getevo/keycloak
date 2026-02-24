@@ -81,7 +81,7 @@ func MigrateFields(model *schema.Model) {
 						},
 					}))
 					if err != nil {
-						log.Error("Error creating keycloak protocol mapper: %v", err)
+						log.Errorf("Error creating keycloak protocol mapper: %v", err)
 						continue
 					}
 				}

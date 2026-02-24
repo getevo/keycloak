@@ -10,14 +10,14 @@ func getClient() {
 		"Authorization": "Bearer " + conn.Admin.AccessToken,
 	})
 	if err != nil {
-		log.Error("Failed to create or update Keycloak client: %v", err)
+		log.Errorf("Failed to create or update Keycloak client: %v", err)
 		return
 	}
 
 	var clients []Client
 	err = post.ToJSON(&clients)
 	if err != nil {
-		log.Error("Failed to parse Keycloak client response: %v", err)
+		log.Errorf("Failed to parse Keycloak client response: %v", err)
 		return
 	}
 

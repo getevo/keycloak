@@ -22,7 +22,7 @@ func (a App) Router() error {
 func (a App) WhenReady() error {
 	var _, err = Connect()
 	if err != nil {
-		log.Error("failed to connect to Keycloak server: %v", err)
+		log.Errorf("failed to connect to Keycloak server: %v", err)
 	}
 	getClient()
 	go migrate()

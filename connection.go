@@ -385,6 +385,9 @@ func (connection *Connection) GetUserRealmRoles(uuid string) ([]string, error) {
 
 // GetUserRealmRoles retrieves the realm roles for a user by UUID using the default connection.
 func GetUserRealmRoles(uuid string) ([]string, error) {
+	if conn == nil {
+		return nil, fmt.Errorf("keycloak: not connected")
+	}
 	return conn.GetUserRealmRoles(uuid)
 }
 
@@ -679,5 +682,8 @@ func Connect(s ...Settings) (*Connection, error) {
 }
 
 func SetDebug(v bool) {
+	if conn == nil {
+		return
+	}
 	conn.Settings.Debug = v
 }

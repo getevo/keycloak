@@ -204,47 +204,82 @@ func (connection *Connection) NewUserFromStruct(user interface{}) error {
 	return nil
 }
 
+var errNotConnected = fmt.Errorf("keycloak: not connected")
+
 func NewUser(user interface{}) error {
+	if conn == nil {
+		return errNotConnected
+	}
 	return conn.NewUserFromStruct(user)
 }
 
 func EditUser(user interface{}, extraAttributes map[string]interface{}) error {
+	if conn == nil {
+		return errNotConnected
+	}
 	return conn.EditUserFromStruct(user, extraAttributes)
 }
 
 func DeleteUser(uuid string) error {
+	if conn == nil {
+		return errNotConnected
+	}
 	return conn.DeleteUser(uuid)
 }
 
 func Login(username, password string) (*JWT, error) {
+	if conn == nil {
+		return nil, errNotConnected
+	}
 	return conn.Login(username, password)
 }
 
 func RefreshToken(refreshToken string) (*JWT, error) {
+	if conn == nil {
+		return nil, errNotConnected
+	}
 	return conn.RefreshToken(refreshToken)
 }
 
 func GetUser(uuid string) (UserInstance, error) {
+	if conn == nil {
+		return UserInstance{}, errNotConnected
+	}
 	return conn.GetUser(uuid)
 }
 
 func ParseToken(accessToken string, claims interface{}, strict bool) (Spec, error) {
+	if conn == nil {
+		return Spec{}, errNotConnected
+	}
 	return conn.ParseToken(accessToken, claims, strict)
 }
 
 func LogoutSession(session *Session) error {
+	if conn == nil {
+		return errNotConnected
+	}
 	return conn.LogoutSession(session)
 }
 
 func Logout(user *UserInstance) error {
+	if conn == nil {
+		return errNotConnected
+	}
 	return conn.LogoutAllSessions(user)
 }
 
 func ChangePassword(user *UserInstance, password string) error {
+	if conn == nil {
+		return errNotConnected
+	}
 	return conn.ChangePassword(user, password)
 }
 
 func VerifyOffline(accessToken string, claims interface{}) (Spec, error) {
+	if conn == nil {
+		return Spec{}, errNotConnected
+	}
 	return conn.VerifyOffline(accessToken, claims)
 }
 

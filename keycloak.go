@@ -248,6 +248,23 @@ func GetUser(uuid string) (UserInstance, error) {
 	return conn.GetUser(uuid)
 }
 
+func UpdateUserAttributes(uuid string, attrs map[string]interface{}) error {
+	if conn == nil {
+		return errNotConnected
+	}
+	user, err := conn.GetUser(uuid)
+	if err != nil {
+		return err
+	}
+	if user.Attributes == nil {
+		user.Attributes = Attributes{}
+	}
+	for k, v := range attrs {
+		user.Attributes.Set(k, sprint(reflect.ValueOf(v)))
+	}
+	return conn.EditUser(&user)
+}
+
 func ParseToken(accessToken string, claims interface{}, strict bool) (Spec, error) {
 	if conn == nil {
 		return Spec{}, errNotConnected

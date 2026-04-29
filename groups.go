@@ -29,6 +29,9 @@ func (connection *Connection) GetGroups() ([]Group, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := adminError(result); err != nil {
+		return nil, err
+	}
 	var groups []Group
 	err = result.ToJSON(&groups)
 	if err != nil {
@@ -44,6 +47,9 @@ func GetGroups() ([]Group, error) {
 func (connection *Connection) GetGroup(id string) (*Group, error) {
 	result, err := connection.Get("/admin", "/groups/"+id)
 	if err != nil {
+		return nil, err
+	}
+	if err := adminError(result); err != nil {
 		return nil, err
 	}
 	var group Group
@@ -291,6 +297,9 @@ func SetUserGroups(uuid string, groups []string) error {
 func (connection *Connection) GetUserGroups(uuid string) ([]Group, error) {
 	result, err := connection.Get("/admin", "/users/"+uuid+"/groups?first=0&max=99999")
 	if err != nil {
+		return nil, err
+	}
+	if err := adminError(result); err != nil {
 		return nil, err
 	}
 	var groups []Group

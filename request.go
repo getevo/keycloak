@@ -3,7 +3,34 @@ package keycloak
 import (
 	"fmt"
 	"github.com/getevo/evo/v2/lib/curl"
+	"github.com/tidwall/gjson"
 )
+
+// adminError inspects a Keycloak admin-API response and, when the HTTP status
+// is non-2xx, returns an error carrying the message Keycloak itself reported
+// (`error_description` / `errorMessage` / `error` envelopes) instead of letting
+// callers blindly unmarshal the error body into the success type and fail with
+// a confusing JSON-shape error.
+func adminError(resp *curl.Resp) error {
+	if resp == nil || resp.Response() == nil {
+		return nil
+	}
+	status := resp.Response().StatusCode
+	if status >= 200 && status < 300 {
+		return nil
+	}
+	body := resp.String()
+	parsed := gjson.Parse(body)
+	for _, key := range []string{"error_description", "errorMessage", "error"} {
+		if msg := parsed.Get(key).String(); msg != "" {
+			return fmt.Errorf("keycloak admin %d: %s", status, msg)
+		}
+	}
+	if body == "" {
+		return fmt.Errorf("keycloak admin %d (empty response)", status)
+	}
+	return fmt.Errorf("keycloak admin %d: %s", status, body)
+}
 
 // Put sends a PUT request to the specified endpoint with the provided query strings and data. It returns a curl.Resp and an error.
 // Parameters:

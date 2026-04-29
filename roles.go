@@ -22,6 +22,9 @@ func (connection *Connection) GetRoles() ([]Role, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := adminError(result); err != nil {
+		return nil, err
+	}
 	var roles []Role
 	err = result.ToJSON(&roles)
 	if err != nil {
@@ -38,6 +41,9 @@ func (connection *Connection) GetRole(id string) (Role, error) {
 	var role Role
 	result, err := connection.Get("/admin", "/roles-by-id/"+id)
 	if err != nil {
+		return role, err
+	}
+	if err := adminError(result); err != nil {
 		return role, err
 	}
 

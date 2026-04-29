@@ -82,9 +82,8 @@ func (connection *Connection) GetUsers(max int, offset int, extra map[string]str
 	if err != nil {
 		return users, err
 	}
-	var parsed = gjson.Parse(result.String())
-	if parsed.Get("error").String() != "" {
-		return nil, fmt.Errorf(parsed.Get("error").String())
+	if err := adminError(result); err != nil {
+		return users, err
 	}
 	err = json.Unmarshal(result.Bytes(), &users)
 	if err != nil {
@@ -369,8 +368,8 @@ func (connection *Connection) GetUserRealmRoles(uuid string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if msg := gjson.Parse(result.String()).Get("error").String(); msg != "" {
-		return nil, fmt.Errorf(msg)
+	if err := adminError(result); err != nil {
+		return nil, err
 	}
 	err = json.Unmarshal(result.Bytes(), &roles)
 	if err != nil {

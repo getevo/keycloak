@@ -1,6 +1,7 @@
 package keycloak
 
 import (
+	"github.com/getevo/evo/v2/lib/log"
 	"fmt"
 	"github.com/getevo/evo/v2/lib/curl"
 	"github.com/tidwall/gjson"
@@ -48,7 +49,7 @@ func (connection *Connection) Put(endpoint string, query string, data ...interfa
 		return nil, err
 	}
 	if connection.Settings.Debug {
-		fmt.Println(resp.Dump())
+		log.Info(resp.Dump())
 	}
 	resp, err = handleRedirect(resp)
 	if err != nil {
@@ -68,7 +69,7 @@ func (connection *Connection) Delete(endpoint string, query string, data ...inte
 		return nil, err
 	}
 	if connection.Settings.Debug {
-		fmt.Println(resp.Dump())
+		log.Info(resp.Dump())
 	}
 	resp, err = handleRedirect(resp)
 	if err != nil {
@@ -89,7 +90,7 @@ func (connection *Connection) Post(endpoint string, query string, data ...interf
 		return nil, err
 	}
 	if connection.Settings.Debug {
-		fmt.Println(resp.Dump())
+		log.Info(resp.Dump())
 	}
 	/*resp, err = handleRedirect(resp)
 	if resp.Response().StatusCode == 204 {
@@ -116,7 +117,7 @@ func (connection *Connection) Get(endpoint string, query string, data ...interfa
 		return nil, err
 	}
 	if connection.Settings.Debug {
-		fmt.Println(resp.Dump())
+		log.Info(resp.Dump())
 	}
 	resp, err = handleRedirect(resp)
 	return resp, nil

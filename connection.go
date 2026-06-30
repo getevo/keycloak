@@ -185,7 +185,7 @@ func (connection *Connection) ChangePassword(user *UserInstance, password string
 	}
 	var result = gjson.Parse(resp.String())
 	if connection.Settings.Debug {
-		fmt.Println(resp.Dump())
+		log.Info(resp.Dump())
 	}
 	if result.Get("error").String() != "" {
 		return fmt.Errorf(result.Get("error").String())
@@ -287,7 +287,7 @@ func (connection *Connection) RefreshToken(refreshToken string) (*JWT, error) {
 		return nil, err
 	}
 	if connection.Settings.Debug {
-		fmt.Println(result.Dump())
+		log.Info(result.Dump())
 	}
 	var parsed = gjson.Parse(result.String())
 	if parsed.Get("error").String() != "" {
@@ -637,7 +637,7 @@ func Connect(s ...Settings) (*Connection, error) {
 		return &connection, err
 	}
 	if config.Debug {
-		fmt.Println(resp.Dump())
+		log.Info(resp.Dump())
 	}
 	connection.Certificate = jose.JSONWebKeySet{}
 	err = resp.ToJSON(&connection.Certificate)

@@ -686,3 +686,46 @@ func SetDebug(v bool) {
 	}
 	conn.Settings.Debug = v
 }
+
+// ExchangeExternalToken swaps an external identity provider's token for a
+// Keycloak token set (RFC 8693 token exchange, "external to internal").
+//
+// subjectIssuer is the IdP alias configured in the realm ("google"), and
+// subjectToken is the token that provider issued. For SOCIAL providers
+// (google, facebook) Keycloak validates the token by calling the provider's
+// userinfo endpoint, so the caller must pass the provider's ACCESS token -
+// an id_token is rejected with `invalid_token: "invalid token type"`, which
+// reads like a malformed token rather than an unsupported token type.
+//
+// The realm needs the `token-exchange` feature enabled at build time, and the
+// calling client needs the `token-exchange` scope permission on the identity
+// provider. A missing permission surfaces as
+// `access_denied: "Client not allowed to exchange"`.
+func (connection *Connection) ExchangeExternalToken(subjectIssuer, subjectToken string) (*JWT, error) {
+	result, err := connection.Post("", "/protocol/openid-connect/token", curl.Param{
+		"client_id":          connection.Settings.Client,
+		"client_secret":      connection.Settings.ClientSecret,
+		"grant_type":         "urn:ietf:params:oauth:grant-type:token-exchange",
+		"subject_issuer":     subjectIssuer,
+		"subject_token":      subjectToken,
+		"subject_token_type": "urn:ietf:params:oauth:token-type:access_token",
+	}, timeout)
+	if err != nil {
+		return nil, err
+	}
+
+	var parsed = gjson.Parse(result.String())
+	if parsed.Get("error").String() != "" {
+		var description = parsed.Get("error_description").String()
+		if description == "" {
+			description = parsed.Get("error").String()
+		}
+		return nil, fmt.Errorf("%s: %s", parsed.Get("error").String(), description)
+	}
+	var j JWT
+	err = json.Unmarshal(result.Bytes(), &j)
+	if err != nil {
+		return nil, err
+	}
+	return &j, nil
+}

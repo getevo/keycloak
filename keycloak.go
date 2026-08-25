@@ -336,3 +336,12 @@ func sprint(v reflect.Value) string {
 
 	return result
 }
+
+// ExchangeExternalToken swaps an external IdP token for a Keycloak token set.
+// See (*Connection).ExchangeExternalToken for the provider-specific details.
+func ExchangeExternalToken(subjectIssuer, subjectToken string) (*JWT, error) {
+	if conn == nil {
+		return nil, errNotConnected
+	}
+	return conn.ExchangeExternalToken(subjectIssuer, subjectToken)
+}
